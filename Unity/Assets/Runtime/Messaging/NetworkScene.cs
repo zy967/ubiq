@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Profiling;
 using System.Linq;
 using Ubiq.Logging;
+using UnityEngine.Events;
 
 namespace Ubiq.Messaging
 {
@@ -105,8 +106,37 @@ namespace Ubiq.Messaging
 
         private static NetworkScene rootNetworkScene;
 
+        public class MessageEvent : UnityEvent<ReferenceCountedMessage>
+        {
+        }
+
+        /// <summary>
+        /// A callback allowing Components to be notified whenever the NetworkScene receives a ReferenceCountedMessage. 
+        /// </summary>
+        /// <remarks>
+        /// This event is very performance sensitive; be careful when using it and remember to call Acquire and Release if keeping the message beyond the lifetime of the broadcast.
+        /// </remarks>
+        public MessageEvent OnMessageSent;
+
+        /// <summary>
+        /// A callback allowing Components to be notified whenever the NetworkScene sends a ReferenceCountedMessage. 
+        /// </summary>
+        /// <remarks>
+        /// This event is very performance sensitive; be careful when using it and remember to call Acquire and Release if keeping the message beyond the lifetime of the broadcast.
+        /// </remarks>
+        public MessageEvent OnMessageReceived;
+
         private void Awake()
         {
+            if(OnMessageSent == null)
+            {
+                OnMessageSent = new MessageEvent();
+            }
+            if(OnMessageReceived == null)
+            {
+                OnMessageReceived = new MessageEvent();
+            }
+
             if (transform.parent == null)
             {
                 if (rootNetworkScene == null)
@@ -206,6 +236,11 @@ namespace Ubiq.Messaging
                         break;
                     }
                 }
+            }
+
+            if(networkObject == null)
+            {
+                networkObject = this;
             }
 
             if (!objectProperties.ContainsKey(networkObject))
@@ -310,6 +345,8 @@ namespace Ubiq.Messaging
                     {
                         try
                         {
+                            OnMessageReceived.Invoke(m);
+
                             var sgbmessage = new ReferenceCountedSceneGraphMessage(m);
 
                             matching.Clear();
@@ -378,6 +415,8 @@ namespace Ubiq.Messaging
         public void Send(ReferenceCountedMessage m)
         {
             Profiler.BeginSample("Send");
+
+            OnMessageSent.Invoke(m);
 
             foreach (var c in connections)
             {

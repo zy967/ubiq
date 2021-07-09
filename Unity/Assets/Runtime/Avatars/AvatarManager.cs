@@ -6,6 +6,7 @@ using Ubiq.Dictionaries;
 using Ubiq.Voip;
 using UnityEngine;
 using UnityEngine.Events;
+using Ubiq.Logging;
 
 namespace Ubiq.Avatars
 {
@@ -34,6 +35,8 @@ namespace Ubiq.Avatars
         private Dictionary<string, Avatar> playerAvatars;
 
         public RoomClient RoomClient { get; private set; }
+
+        private EventLogger debug;
 
         public IEnumerable<Avatar> Avatars
         {
@@ -115,6 +118,8 @@ namespace Ubiq.Avatars
             {
                 OnAvatarDestroyed = new AvatarDestroyEvent();
             }
+
+            debug = new ComponentEventLogger(this);
         }
 
         private void Start()
@@ -207,6 +212,8 @@ namespace Ubiq.Avatars
                 }
 
                 OnAvatarCreated.Invoke(created);
+
+                debug.Log("CreateAvatar", peer.UUID, created.Id);
             }
 
             // Update the avatar instance
