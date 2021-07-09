@@ -13,6 +13,8 @@ namespace Ubiq.Voip
         private G722Codec g722Codec;
         private G722CodecState g722CodecState;
 
+        public static Action<byte[]> OnDecode;
+
         // public int Decode(short[] pcm, byte[] encoded)
         // {
         //     if (g722Codec == null)
@@ -42,6 +44,11 @@ namespace Ubiq.Voip
 
             var requiredDecodedSampleCount = encoded.Length * 2;
             var pcm = new short[requiredDecodedSampleCount];
+
+            if(OnDecode != null)
+            {
+                OnDecode(encoded);
+            }
 
             g722Codec.Decode(g722CodecState,pcm,encoded,encoded.Length);
             return pcm;
