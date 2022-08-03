@@ -162,14 +162,14 @@ public class Ball : RoomObject, IUseable, IBall
     }
 
  
-    public override void ObjectSpawned(RoomInfo room, string jsonObjectInfo)
+    public override void ObjectSpawned(RoomClient room, string jsonObjectInfo)
     {
         Debug.Log("Ball: ObjectSpawned: " + jsonObjectInfo);
         RoomDictionaryInfoMessage<BallState> objectInfo = JsonUtility.FromJson<RoomDictionaryInfoMessage<BallState>>(jsonObjectInfo);
         SetRoomObjectInfo(objectInfo);
         
         Me.SetRoom(room);
-        RoomName = room.Name;
+        RoomName = room.name;
     }
 
     override protected void SetObjectProperties(bool setVelocityZero = false)
@@ -186,7 +186,7 @@ public class Ball : RoomObject, IUseable, IBall
 
         Me[info.RoomDictionaryKey] = JsonUtility.ToJson( new RoomDictionaryInfoMessage<BallState>(){
             catalogueIndex = this.catalogueIndex,
-            networkId = this.Id,
+            networkId = this.networkId,
             persistencyLevel = info.PersistencyLevel,
             state = objectState
         });
@@ -209,7 +209,7 @@ public class Ball : RoomObject, IUseable, IBall
             }
             this.currentVelocity = state.velocity;
             this.catalogueIndex = msg.catalogueIndex;
-            Id = msg.networkId;
+            networkId = msg.networkId;
             
             this.persistencyLevel = msg.persistencyLevel.StringToEnum();
             Me.SetPersistencyLevel(this.persistencyLevel);

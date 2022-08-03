@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Ubiq.Rooms;
 using Ubiq.Samples;
+using Ubiq.Spawning;
 using Ubiq.XR;
 using UnityEngine;
 
@@ -30,11 +31,14 @@ public class BallSpawner : MonoBehaviour, IUseable
     public void Use(Hand controller)
     {
         Debug.Log("BallSpawner: Use");
-        var ball = NetworkSpawner.SpawnPersistent(this, BallPrefab).GetComponents<MonoBehaviour>().Where(mb => mb is IBall).FirstOrDefault() as IBall;
-        if (ball != null)
-        {
-            ball.Attach(controller);
-        }
+
+        // TODO: Not working code
+        Debug.LogError("Ball Spawner not working");
+
+        // var ball = NetworkSpawner.SpawnPersistent(this, BallPrefab).GetComponents<MonoBehaviour>().Where(mb => mb is IBall).FirstOrDefault() as IBall;
+        // if (ball != null)
+        // {
+        //     ball.Attach(controller);
+        // }
     }
 }
-

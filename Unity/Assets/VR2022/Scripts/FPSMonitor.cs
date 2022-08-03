@@ -7,7 +7,7 @@ using System;
 
 public class FPSMonitor : MonoBehaviour
 {
-    private EventLogger logger;
+    // private EventLogger logger;
     int fps;
 
     private string id;
@@ -36,7 +36,7 @@ public class FPSMonitor : MonoBehaviour
         
         if(client != null)
         {
-            id = client.Me.UUID;
+            id = client.Me.uuid;
         }
         Application.targetFrameRate = 60;
         // QualitySettings.vSyncCount = 1;

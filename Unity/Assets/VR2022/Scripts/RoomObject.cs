@@ -10,6 +10,7 @@ using Ubiq.Rooms.Messages;
 using Ubiq.Samples;
 using System.Linq;
 using System;
+using Ubiq.Spawning;
 
 
 [Serializable]
@@ -57,11 +58,12 @@ public enum RoomObjectPersistencyLevel
 
 public abstract class RoomObjectInterface
 {
-    public RoomObjectInterface(string name, RoomInfo room = new RoomInfo())
+    public RoomObjectInterface(string name, RoomClient room = null)
     {
         Name = name;
         Room = room;
-        MyPeer = new PeerInfo();
+        if (Room != null)
+            MyPeer = room.Me;
         OwnerPeerUUID = "";
         properties = new SerializableDictionary();
     }
@@ -69,11 +71,10 @@ public abstract class RoomObjectInterface
     public string Name { get; protected set; }
     public string UUID { get; protected set; }
     protected NetworkId NetworkId;
-    protected ushort ComponentId;
     protected string RoomDictionaryKey;
     protected RoomObjectPersistencyLevel PersistencyLevel;
-    protected RoomInfo Room;
-    protected PeerInfo MyPeer;
+    protected RoomClient Room;
+    protected IPeer MyPeer;
     protected string OwnerPeerUUID;
 
     protected SerializableDictionary properties;
@@ -96,7 +97,7 @@ public abstract class RoomObjectInterface
 
     public RoomObjectInfo GetRoomObjectInfo()
     {
-        return new RoomObjectInfo(Name, NetworkId, ComponentId,
+        return new RoomObjectInfo(Name, NetworkId,
                                 Room, MyPeer, OwnerPeerUUID,
                                 PersistencyLevel.EnumToString(), RoomDictionaryKey, properties);
     }
@@ -115,17 +116,12 @@ public struct RoomObjectInfo
         get => networkId;
     }
 
-    public ushort ComponentId
-    {
-        get => componentId;
-    }
-
-    public RoomInfo Room
+    public RoomClient Room
     {
         get => room;
     }
 
-    public PeerInfo MyPeer
+    public IPeer MyPeer
     {
         get => myPeer;
     }
@@ -144,7 +140,7 @@ public struct RoomObjectInfo
     {
         get => roomDictionaryKey;
     }
-    
+
     public string this[string key]
     {
         get => properties != null ? properties[key] : null;
@@ -165,13 +161,10 @@ public struct RoomObjectInfo
     private NetworkId networkId;
 
     [SerializeField]
-    private ushort componentId;
+    private RoomClient room;
 
     [SerializeField]
-    private RoomInfo room;
-
-    [SerializeField]
-    private PeerInfo myPeer;
+    private IPeer myPeer;
 
     [SerializeField]
     private string ownerPeerUUID;
@@ -185,15 +178,14 @@ public struct RoomObjectInfo
     [SerializeField]
     private SerializableDictionary properties;
 
-    public RoomObjectInfo(string name, 
-                        NetworkId networkId, ushort componentId, 
-                        RoomInfo room, PeerInfo myPeer, 
-                        string ownerPeerUUID, string persistencyLevel,
-                        string roomDictionaryKey, SerializableDictionary properties)
+    public RoomObjectInfo(string name,
+        NetworkId networkId,
+        RoomClient room, IPeer myPeer,
+        string ownerPeerUUID, string persistencyLevel,
+        string roomDictionaryKey, SerializableDictionary properties)
     {
         this.name = name;
         this.networkId = networkId;
-        this.componentId = componentId;
         this.room = room;
         this.myPeer = myPeer;
         this.ownerPeerUUID = ownerPeerUUID;
@@ -203,7 +195,7 @@ public struct RoomObjectInfo
     }
 }
 
-public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObject, ISpawnable
+public abstract class RoomObject : MonoBehaviour, INetworkSpawnable
 {
 
     [Serializable]
@@ -229,19 +221,18 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         {
             Name = args.Name;
             NetworkId = args.Id;
-            ComponentId = args.ComponentId;
             RoomDictionaryKey = args.RoomDictionaryKey;
             PersistencyLevel = args.PersistencyLevel.StringToEnum();
             OwnerPeerUUID = args.OwnerPeerUUID;
-            properties = new SerializableDictionary(args.Properties); 
+            properties = new SerializableDictionary(args.Properties);
         }
 
-        public void SetRoom(RoomInfo room)
+        public void SetRoom(RoomClient room)
         {
             Room = room;
         }
 
-        public void SetMyPeer(PeerInfo peer)
+        public void SetMyPeer(IPeer peer)
         {
             MyPeer = peer;
         }
@@ -261,16 +252,11 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
             RoomDictionaryKey = key;
         }
 
-        public void SetComponentId(ushort id)
-        {
-            ComponentId = id;
-        }
-
         public void SetPersistencyLevel(RoomObjectPersistencyLevel persistencyLevel)
         {
             PersistencyLevel = persistencyLevel;
         }
-    }   
+    }
 
     [Serializable]
     public class RoomDictionaryInfoMessage<T> where T : IRoomObjectState // This data will be stored in the room dictionary
@@ -278,22 +264,22 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         public int catalogueIndex;
         public NetworkId networkId;
         public string persistencyLevel;
-        public T state; 
-    } 
+        public T state;
+    }
 
     [Serializable]
     public struct RoomObjectOwnerMessage // Structure for updating object onwer message
     {
-        public PeerInfo myPeer;
+        public IPeer myPeer;
         public string uuid;
         public RoomObjectInfo objectInfo;
-    }    
+    }
 
     [Serializable]
     public struct RoomObjectRoomMessage // Structure for updating object room message
     {
-        public PeerInfo myPeer;
-        public RoomInfo room;
+        public IPeer myPeer;
+        public RoomClient room;
         public RoomObjectInfo objectInfo;
     }
 
@@ -302,13 +288,13 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     {
         public RoomObjectInfo objectInfo;
         public IRoomObjectState state;
-    }     
+    }
 
     // Marker interface to enable function/struct inheritance
     // Child class that creates a new State structure should mark the struct as IRoomObjectState
     [Serializable]
     public class IRoomObjectState {}
-    
+
 
     [Serializable]
     public class RoomObjectState: IRoomObjectState // Structure for object state, child objects likely to have their own state implementation
@@ -321,22 +307,22 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     private NetworkId RoomServerObjectId = new NetworkId(1);
     private ushort RoomServerComponentId = 1;
 
-    public NetworkId Id 
-    { 
+    public NetworkId networkId
+    {
         get
         {
             return Me.GetRoomObjectInfo().Id;
-        } 
+        }
 
         set
         {
-            
+
             Me.SetNetworkId(value);
             if(roomDictionaryKey == null || roomDictionaryKey == "")
             {
                 roomDictionaryKey = $"SpawnedObject-{ value }";
             }
-            
+
         }
     }
 
@@ -360,7 +346,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     public bool owner = false;
 
     public bool spawned = false;
-    public NetworkContext context;
+    public NetworkScene context;
     public RoomObjectInterfaceFriend Me { get; private set; }
 
     public bool updateServer = false;
@@ -378,12 +364,12 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     public bool inEmptyRoom = false;
     private bool destroyMethodInvoked = false;
     private bool needsSpawning = true;
-    
+
     public class ObjectEvent: UnityEvent<RoomObjectInfo> { };
     public ObjectEvent OnObjectDestroyed;
-    
-    private RoomInfo RoomToAssign;
-    private PeerInfo OwnerToAssign;
+
+    private RoomClient RoomToAssign;
+    private IPeer OwnerToAssign;
 
     protected bool messageProcessed = false;
 
@@ -394,7 +380,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
 
     protected MeshRenderer meshRenderer;
 
-    public void Awake() 
+    public void Awake()
     {
         Debug.Log("RoomObject: Awake");
 
@@ -402,14 +388,12 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         {
             OnObjectDestroyed = new ObjectEvent();
         }
-        
-        Me = new RoomObjectInterfaceFriend(Guid.NewGuid().ToString(), gameObject.name);   
-        
+
+        Me = new RoomObjectInterfaceFriend(Guid.NewGuid().ToString(), gameObject.name);
+
         if(context == null)
         {
-            context = NetworkScene.Register(this);
-            
-            Me.SetComponentId(context.componentId);
+            context = NetworkScene.FindNetworkScene(gameObject.transform);
         }
         rb = GetComponent<Rigidbody>();
         rb.collisionDetectionMode = CollisionDetectionMode.ContinuousSpeculative;
@@ -425,15 +409,14 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         Debug.Log("RoomObject: Start");
         if(context == null)
         {
-            context = NetworkScene.Register(this);
-            Me.SetComponentId(context.componentId);
+            context = NetworkScene.FindNetworkScene(gameObject.transform);
         }
 
         if(Me.GetRoomObjectInfo().MyPeer.uuid == null || Me.GetRoomObjectInfo().MyPeer.uuid == "")
         {
             GetMyPeer();
         }
-        
+
 
         if(rb == null)
         {
@@ -468,7 +451,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         {
             timeRemaining -= Time.deltaTime;
             // UpdateObject();
-        } 
+        }
         else if(inEmptyRoom && owner)
         {
             DestroyLocalObject();
@@ -492,7 +475,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
 
     public virtual void OnObjectLeftCell(Cell cell)
     {
-        if(Me.GetRoomObjectInfo().Room.UUID == cell.CellUUID)
+        if(Me.GetRoomObjectInfo().Room.Me.uuid == cell.CellUUID)
         {
             timeRemaining = timeToDestroyObject;
             notInRoom = true;
@@ -516,7 +499,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         {
             return;
         }
-        
+
         if(owner)
         {
             Me.SetOwnerUUID("");
@@ -544,7 +527,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         };
         Me[info.RoomDictionaryKey] = JsonUtility.ToJson( new RoomDictionaryInfoMessage<RoomObjectState>(){
             catalogueIndex = this.catalogueIndex,
-            networkId = this.Id,
+            networkId = this.networkId,
             persistencyLevel = info.PersistencyLevel,
             state = objectState
         });
@@ -556,21 +539,21 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         var info = msg;
         if(info.state is RoomObjectState)
         {
-        
+
             // T state = (T) msg.state;
             RoomObjectState state = msg.state as RoomObjectState;
             // Debug.Log("RoomObject: SetRoomObjectInfo: catalogueIndex: " + info.catalogueIndex + ", networkId: " + info.networkId + ", position: " + info.state.position + ", rotation: " + info.state.rotation + ", velocity: " + info.state.velocity);
             this.transform.position = state.position;
             this.transform.rotation = state.rotation;
-            
+
             if(rb != null)
             {
                 rb.velocity = state.velocity;
             }
             this.currentVelocity = state.velocity;
             this.catalogueIndex = info.catalogueIndex;
-            Id = info.networkId;
-            
+            networkId = info.networkId;
+
             this.persistencyLevel = info.persistencyLevel.StringToEnum();
             Me.SetPersistencyLevel(this.persistencyLevel);
         }
@@ -582,7 +565,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     }
 
 
-    public void UpdateRoom(RoomInfo newRoom)
+    public void UpdateRoom(RoomClient newRoom)
     {
         notInRoom = false;
         timeRemaining = timeToDestroyObject;
@@ -592,19 +575,19 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
             Debug.Log("RoomObject: UpdateRoom: I'm not the owner, return");
             return;
         }
-        Debug.Log("RoomObject: UpdateRoom: current room: " + info.Room.Name + ", new room: " + newRoom.Name);
-        
-        if(info.Room.UUID == newRoom.UUID || RoomToAssign.UUID == newRoom.UUID)
+        Debug.Log("RoomObject: UpdateRoom: current room: " + info.Room.name + ", new room: " + newRoom.name);
+
+        if(info.Room.Me.uuid == newRoom.Me.uuid || RoomToAssign.Me.uuid == newRoom.Me.uuid)
         {
             return;
         }
         RoomToAssign = newRoom;
-        if(Id == new NetworkId())
+        if(networkId == new NetworkId())
         {
             Debug.Log("RoomObject ID is null, create new one");
-            
-            Id = IdGenerator.GenerateFromName(this.name+newRoom.Name);
-            Me.SetNetworkId(Id);
+
+            networkId = IdGenerator.GenerateFromName(this.name+newRoom.name);
+            Me.SetNetworkId(networkId);
         }
 
         SetObjectProperties();
@@ -616,7 +599,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         });
     }
 
-    public void SetMyPeer(PeerInfo peer)
+    public void SetMyPeer(IPeer peer)
     {
         Me.SetMyPeer(peer);
         if(owner)
@@ -631,7 +614,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         if(!owner)
         {
             return;
-        } 
+        }
 
         SetObjectProperties();
 
@@ -655,12 +638,11 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
     {
         if(context == null)
         {
-            context = NetworkScene.Register(this);
-            Me.SetComponentId(context.componentId);
+            context = NetworkScene.FindNetworkScene(gameObject.transform);
         }
 
         Debug.Log("RoomObject: SendToServer: type: " + type + ", args: " + argument.ToString());
-        context.Send(RoomServerObjectId, RoomServerComponentId, JsonUtility.ToJson(new Message(type, argument)));
+        context.Send(RoomServerObjectId, JsonUtility.ToJson(new Message(type, argument)));
     }
 
 
@@ -673,16 +655,16 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
             case "SetMyPeer":
             {
                 Debug.Log("RoomObject: " + name + " received message to set my peer, owner: "+owner);
-                var peer = JsonUtility.FromJson<PeerInfo>(container.args);
+                var peer = JsonUtility.FromJson<IPeer>(container.args);
                 Me.SetMyPeer(peer);
                 MyPeerUUID = peer.uuid;
 
                 RoomObjectInfo info = Me.GetRoomObjectInfo();
-                if(owner && info.Room.UUID != null && info.Room.UUID != "")
+                if(owner && info.Room.Me.uuid != null && info.Room.Me.uuid != "")
                 {
                     UpdateOwner(peer.uuid);
                 }
-                
+
                 if(owner)
                 {
                     Me.SetOwnerUUID(peer.uuid);
@@ -699,7 +681,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
                 Debug.Log("RoomObject: " + name + ": msg.myPeer: " + args.myPeer.uuid);
                 Debug.Log("RoomObject: " + name + ": msg.ownerPeer: " + args.uuid);
                 Debug.Log("RoomObject: " + name + ": msg.objectInfo.Name: " + args.objectInfo.Name);
-                
+
                 if(inEmptyRoom && args.myPeer.uuid != args.uuid)
                 {
                     owner = false;
@@ -723,7 +705,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
                 Me.SetOwnerUUID(args.uuid);
                 if(owner)
                 {
-                    
+
                     Me.Update(args.objectInfo);
                     Debug.Log("RoomObject: object info: " + args.objectInfo);
                     Debug.Log("RoomObject: RoomDictionaryKey: " + Me.GetRoomObjectInfo().RoomDictionaryKey);
@@ -740,25 +722,25 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
             {
                 Debug.Log("RoomObject: " + name + " received message to update room");
                 var args = JsonUtility.FromJson<RoomObjectRoomMessage>(container.args);
-                Debug.Log("RoomObject: Assign new room: " + args.room.Name);
+                Debug.Log("RoomObject: Assign new room: " + args.room.name);
                 Debug.Log("RoomObject: " + name + ": msg.myPeer: " + args.myPeer.uuid);
                 Debug.Log("RoomObject: " + name + ": msg.objectInfo.Name: " + args.objectInfo.Name);
                 Me.SetRoom(args.room);
-                RoomName = args.room.Name;
-                notInRoom = (args.room.UUID == "" || args.room.UUID == null);
+                RoomName = args.room.name;
+                notInRoom = (args.room.Me.uuid == "" || args.room.Me.uuid == null);
                 if(!notInRoom)
                 {
                     timeRemaining = timeToDestroyObject;
                 }
-                RoomToAssign = new RoomInfo();
+                RoomToAssign = new RoomClient();
                 RoomObjectInfo info = Me.GetRoomObjectInfo();
-                if(owner && info.OwnerPeerUUID != info.MyPeer.uuid && info.Room.UUID != null && info.Room.UUID != "")
+                if(owner && info.OwnerPeerUUID != info.MyPeer.uuid && info.Room.Me.uuid != null && info.Room.Me.uuid != "")
                 {
                     UpdateOwner(args.myPeer.uuid);
                 }
 
                 //The owner of the object updated the room, update this peer object server side
-                if(!owner && args.room.UUID != null && args.room.UUID != "")
+                if(!owner && args.room.Me.uuid != null && args.room.Me.uuid != "")
                 {
                     Debug.Log("RoomObject: I'm not owner check if my peer is in the same room as the object");
                     SetObjectProperties();
@@ -772,7 +754,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
             {
                 Debug.Log("RoomObject: " + name + " received message to update object");
                 var args = JsonUtility.FromJson<RoomObjectRoomMessage>(container.args);
-            
+
                 Me.SetRoom(args.room);
                 Me.Update(args.objectInfo);
                 messageProcessed = true;
@@ -785,12 +767,12 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
                 Me["inEmptyRoom"] = JsonUtility.ToJson(true);
                 inEmptyRoom = true;
                 timeRemaining = timeToDestroyObject;
-                
+
                 if(meshRenderer != null)
                 {
                     meshRenderer.enabled = false;
                 }
-                
+
                 messageProcessed = true;
 
             }
@@ -814,18 +796,25 @@ public abstract class RoomObject : MonoBehaviour, INetworkComponent, INetworkObj
         }
     }
 
-    public virtual void ObjectSpawned(RoomInfo room, string jsonObjectInfo)
+    public virtual void ObjectSpawned(RoomClient room, string jsonObjectInfo)
     {
-        Debug.Log("RoomObject: ObjectSpawned: room " + room.Name);
+        Debug.Log("RoomObject: ObjectSpawned: room " + room.name);
         RoomDictionaryInfoMessage<IRoomObjectState> objectInfo = JsonUtility.FromJson<RoomDictionaryInfoMessage<IRoomObjectState>>(jsonObjectInfo);
         Debug.Log("RoomObject: ObjectSpawned: jsonObjectInfo: " + jsonObjectInfo);
         SetRoomObjectInfo(objectInfo);
         
         Me.SetRoom(room);
-        RoomName = room.Name;
+        RoomName = room.name;
     }
 
-    public virtual void OnSpawned(bool local)
+    // public virtual void OnSpawned(bool local)
+    // {
+    //     spawned = true;
+    //     needsSpawning = false;
+    //     owner = local;
+    // }
+
+    public void Spawned(bool local)
     {
         spawned = true;
         needsSpawning = false;

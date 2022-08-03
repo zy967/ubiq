@@ -5,12 +5,13 @@ using Ubiq.Dictionaries;
 using Ubiq.Messaging;
 using Ubiq.Rooms;
 using Ubiq.Rooms.Messages;
+using Ubiq.Samples;
 using UnityEngine;
 
 
 public class GridManager : MonoBehaviour
 {
-    public Dictionary<string, RoomInfo> availableRooms = new Dictionary<string, RoomInfo>();
+    public Dictionary<string, RoomClient> availableRooms = new Dictionary<string, RoomClient>();
     public Grid grid;
     public NetworkScene networkScene;
     public RoomClient client;
@@ -28,7 +29,7 @@ public class GridManager : MonoBehaviour
             if(n!=null)
             {
                 networkScene = n;
-            }   
+            }
         }
 
         if(grid == null)
@@ -37,7 +38,7 @@ public class GridManager : MonoBehaviour
             if(g != null)
             {
                 grid = g;
-            }   
+            }
         }
 
         client = networkScene.GetComponentInChildren<RoomClient>();
@@ -76,7 +77,9 @@ public class GridManager : MonoBehaviour
             else
             {
                 // Server will create a new room with the cell name
-                roomObject.UpdateRoom(new RoomInfo(info.cell.name, info.cell.CellUUID, "", true, new Ubiq.Dictionaries.SerializableDictionary()));
+                // TODO: not actually working
+                RoomClient newRoom = new RoomClient();
+                roomObject.UpdateRoom(newRoom);
             }
         }
     }
@@ -127,18 +130,18 @@ public class GridManager : MonoBehaviour
         availableRooms.Clear();
         foreach (var room in rooms)
         {
-            availableRooms[room.UUID] = (RoomInfo) room;
+            availableRooms[room.UUID] = (RoomClient) room;
             if(joinRoom && grid.PlayerCell != null && grid.PlayerCell.CellUUID == room.UUID)
             {
                 roomFound = true;
-                JoinRoom((RoomInfo) room);
+                JoinRoom((RoomClient) room);
             }
         }
 
         if(grid.PlayerCell != null && joinRoom && !roomFound)
         {
             CreateRoom(grid.PlayerCell.Name, grid.PlayerCell.CellUUID);
-            availableRooms[grid.PlayerCell.CellUUID] = new RoomInfo();
+            availableRooms[grid.PlayerCell.CellUUID] = new RoomClient();
         }
 
         if(grid.PlayerCell != null && !joinRoom)
@@ -154,7 +157,7 @@ public class GridManager : MonoBehaviour
 
     }
 
-    public void JoinRoom(RoomInfo room)
+    public void JoinRoom(RoomClient room)
     {
         // Start observing to the current room
         if(client.Room.UUID != null && client.Room.UUID != "")
@@ -163,8 +166,8 @@ public class GridManager : MonoBehaviour
         }
         // Join the new room, leaves the current room in the process
         // If I'm already observing to the new room, also stops observing it
-        client.Join(room.JoinCode);
-        
+        client.Join(room.Room.JoinCode);
+
         return;
     }
 
@@ -178,6 +181,6 @@ public class GridManager : MonoBehaviour
 
     void OnRoomCreated(IRoom room)
     {
-        JoinRoom((RoomInfo) room);
+        JoinRoom((RoomClient) room);
     }
 }

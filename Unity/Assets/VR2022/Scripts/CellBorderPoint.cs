@@ -98,16 +98,16 @@ public class CellBorderPoint: MonoBehaviour
             RoomObject roomObject = other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
             if(roomObject != null)
             {
-                if(removeCoroutines.ContainsKey(roomObject.Id.ToString()))
+                if(removeCoroutines.ContainsKey(roomObject.networkId.ToString()))
                 {
                     // Debug.Log("Stop Client Agent Remove Coroutine");
-                    StopCoroutine(removeCoroutines[roomObject.Id.ToString()]);
+                    StopCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
                 }
                 // Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
-                if(!triggeredObjects.ContainsKey(roomObject.Id.ToString()))
+                if(!triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
                 {
                     invokeEvent = true;
-                    triggeredObjects.Add(roomObject.Id.ToString(), other.gameObject);
+                    triggeredObjects.Add(roomObject.networkId.ToString(), other.gameObject);
                     cellBorderEventInfo.objectType = "RoomObject";
                 }
             }
@@ -144,11 +144,11 @@ public class CellBorderPoint: MonoBehaviour
             if(roomObject != null)
             {
                 // Debug.Log("Room Object Exited Border: " + this.name);
-                if(triggeredObjects.ContainsKey(roomObject.Id.ToString()))
+                if(triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
                 {
                     // Debug.Log("Add Coroutine For Removing Client Agent");
-                    removeCoroutines[roomObject.Id.ToString()] = WaitAndRemove(0, roomObject.Id.ToString(), "RoomObject");
-                    StartCoroutine(removeCoroutines[roomObject.Id.ToString()]);
+                    removeCoroutines[roomObject.networkId.ToString()] = WaitAndRemove(0, roomObject.networkId.ToString(), "RoomObject");
+                    StartCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
                 }
             }
 

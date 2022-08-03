@@ -275,16 +275,16 @@ public class Cell: MonoBehaviour, ICell
             if(roomObject != null)
             {
                 // Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
-                if(!activeTriggers.ContainsKey(roomObject.Id.ToString()))
+                if(!activeTriggers.ContainsKey(roomObject.networkId.ToString()))
                 {
-                    // Debug.Log("HexCell: new object, create new mepty list with key: " + roomObject.Id.ToString());
+                    // Debug.Log("HexCell: new object, create new mepty list with key: " + roomObject.networkId.ToString());
                     roomObject.OnObjectDestroyed.AddListener(OnObjectDestroyed);
                     invokeEvent = true;
-                    activeTriggers[roomObject.Id.ToString()] = new List<string>();
+                    activeTriggers[roomObject.networkId.ToString()] = new List<string>();
                     cellEventInfo.objectType = "RoomObject";
                 }
                 // Debug.Log("HexCell: add trigger: " + triggerInfo.trigger.name + " to active triggers for the object");
-                activeTriggers[roomObject.Id.ToString()].Add(triggerInfo.trigger.name);
+                activeTriggers[roomObject.networkId.ToString()].Add(triggerInfo.trigger.name);
             }
         }
         
@@ -312,13 +312,13 @@ public class Cell: MonoBehaviour, ICell
         else //Something else triggered
         {
             RoomObject roomObject = triggerInfo.triggeredObject.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
-            if(roomObject != null && activeTriggers.ContainsKey(roomObject.Id.ToString())) 
+            if(roomObject != null && activeTriggers.ContainsKey(roomObject.networkId.ToString()))
             {
-                activeTriggers[roomObject.Id.ToString()].Remove(triggerInfo.trigger.name);
+                activeTriggers[roomObject.networkId.ToString()].Remove(triggerInfo.trigger.name);
                 // Debug.Log("Hex Cell On Trigger Exit: " + triggerInfo.triggeredObject.name + " left trigger: " + triggerInfo.trigger.name);
-                if(activeTriggers[roomObject.Id.ToString()].Count == 0)
+                if(activeTriggers[roomObject.networkId.ToString()].Count == 0)
                 {
-                    activeTriggers.Remove(roomObject.Id.ToString());
+                    activeTriggers.Remove(roomObject.networkId.ToString());
                     OnLeftCell.Invoke(new CellEventInfo {
                         cell = this,
                         go = triggerInfo.triggeredObject,
@@ -402,8 +402,3 @@ public class Cell: MonoBehaviour, ICell
                         }).ToString("N");
     }
 }
-
-
-
-
-
