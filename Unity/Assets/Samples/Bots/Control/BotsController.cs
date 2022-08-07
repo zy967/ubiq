@@ -18,6 +18,7 @@ namespace Ubiq.Samples.Bots
         public bool EnableAudio { get; set; }
         public int UpdateRate { get; set; }
         public int Padding { get; set; }
+        public string Message { get; set; } // A message sent to each new bot (using Unity's SendMessage).
 
         public int NumBotsRoomPeers => BotsRoom.NumPeers;
         public PerformanceMonitor BotsRoom;
@@ -53,6 +54,11 @@ namespace Ubiq.Samples.Bots
                 CommandJoinCode = Room.JoinCode;
             });
             roomClient.Join(BotsConfig.CommandRoomGuid);
+
+            roomClient.OnPeerRemoved.AddListener(peer =>
+            {
+                proxies.Remove(peer.uuid);
+            });
 
             BotsRoom.RoomClient.OnJoinedRoom.AddListener(Room => {
                 AddBotsToRoom(Room.JoinCode);
@@ -102,6 +108,23 @@ namespace Ubiq.Samples.Bots
             }
         }
 
+        public new void SendMessage(string methodName)
+        {
+            if (Message != methodName)
+            {
+                Message = methodName;
+                UpdateProxies();
+            }
+        }
+
+        public void TerminateProcesses()
+        {
+            foreach (var item in proxies.Values)
+            {
+                item.Quit();
+            }
+        }
+
         public void ClearBots()
         {
             foreach (var item in proxies.Values)
@@ -130,7 +153,6 @@ namespace Ubiq.Samples.Bots
                         {
                             var Proxy = new BotManagerProxy(this,networkScene);
                             Proxy.Id = Message.NetworkId;
-                            Proxy.ComponentId = Message.ComponentId;
                             Proxy.Guid = Message.Guid;
                             Proxy.Pid = Message.Pid;
                             proxies.Add(Proxy.Guid, Proxy);
@@ -167,7 +189,8 @@ namespace Ubiq.Samples.Bots
                     BotsRoomJoinCode = controller.BotsJoinCode,
                     EnableAudio = controller.EnableAudio,
                     AvatarDataPadding = controller.Padding,
-                    AvatarUpdateRate = controller.UpdateRate
+                    AvatarUpdateRate = controller.UpdateRate,
+                    Message = controller.Message
                 });
             }
         }
@@ -188,11 +211,23 @@ namespace Ubiq.Samples.Bots
             }
         }
 
+        public void Quit()
+        {
+            if (networkScene)
+            {
+                networkScene.SendJson(Id, new Quit());
+            }
+        }
+
+        public void SetBotState(string botState)
+        {
+
+        }
+
         private NetworkScene networkScene;
         private BotsController controller;
 
         public NetworkId Id;
-        public ushort ComponentId;
         public string Guid;
         public string Pid;
         public int NumBots;
