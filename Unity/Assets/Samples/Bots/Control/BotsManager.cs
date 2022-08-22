@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Spatial;
 using Ubiq.Avatars;
 using Ubiq.Extensions;
 using Ubiq.Messaging;
@@ -9,6 +10,7 @@ using Ubiq.Networking;
 using Ubiq.Rooms;
 using Ubiq.Samples.Bots.Messaging;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Events;
 
 namespace Ubiq.Samples.Bots
@@ -44,13 +46,13 @@ namespace Ubiq.Samples.Bots
         /// </summary>
         public bool EnableAudio = true;
 
-        private List<Bot> bots;
+        private List<BotAgentPlayer> bots;
         private float lastStatusTime;
         private string botsRoomJoinCode;
         private NetworkScene networkScene;
         private RoomClient roomClient;
 
-        public class BotPeerEvent : UnityEvent<Bot>
+        public class BotPeerEvent : UnityEvent<BotAgentPlayer>
         {
         }
 
@@ -58,8 +60,8 @@ namespace Ubiq.Samples.Bots
 
         private void Awake()
         {
-            bots = new List<Bot>();
-            bots.AddRange(MonoBehaviourExtensions.GetComponentsInScene<Bot>());
+            bots = new List<BotAgentPlayer>();
+            bots.AddRange(MonoBehaviourExtensions.GetComponentsInScene<BotAgentPlayer>());
             bots.ForEach(b => GetRoomClient(b).SetDefaultServer(BotsConfig.BotServer));
             roomClient = RoomClient.Find(this);
             roomClient.SetDefaultServer(BotsConfig.CommandServer);
@@ -102,7 +104,8 @@ namespace Ubiq.Samples.Bots
         public void AddBot()
         {
             var newBot = GameObject.Instantiate(BotPeer);
-            var bot = newBot.GetComponentInChildren<Bot>();
+            var bot = newBot.GetComponentInChildren<BotAgentPlayer>();
+            Assert.IsNotNull(bot);
             bots.Add(bot);
             InitialiseBot(bot);
             AddBotsToRoom(bot);
@@ -133,7 +136,7 @@ namespace Ubiq.Samples.Bots
             bots.Clear();
         }
 
-        public void AddBotsToRoom(Bot bot)
+        public void AddBotsToRoom(BotAgentPlayer bot)
         {
             var botRoomClient = GetRoomClient(bot);
             if(!string.IsNullOrEmpty(botsRoomJoinCode) && botRoomClient.Room.JoinCode != botsRoomJoinCode)
@@ -154,7 +157,7 @@ namespace Ubiq.Samples.Bots
             }
         }
 
-        private void InitialiseBot(Bot bot)
+        private void InitialiseBot(BotAgentPlayer bot)
         {
             var rc = GetRoomClient(bot);
             rc.Me["ubiq.botmanager.id"] = Guid;
@@ -207,7 +210,7 @@ namespace Ubiq.Samples.Bots
             OnBot.Invoke(bot);
         }
 
-        private RoomClient GetRoomClient(Bot bot)
+        private RoomClient GetRoomClient(BotAgentPlayer bot)
         {
             return bot.GetClosestComponent<RoomClient>();
         }
