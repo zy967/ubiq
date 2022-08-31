@@ -3100,13 +3100,13 @@ MonoBehaviour:
   DefaultCommandServer:
     listen_on_ip: 
     listen_on_port: 
-    send_to_ip: nexus.cs.ucl.ac.uk
+    send_to_ip: 18.133.119.167
     send_to_port: 8007
     type: 0
   DefaultBotServer:
     listen_on_ip: 
     listen_on_port: 
-    send_to_ip: nexus.cs.ucl.ac.uk
+    send_to_ip: 18.133.119.167
     send_to_port: 8007
     type: 0
   ControlRoomId: 87ef0572-67ea-43cc-b2d9-a242428ce929
@@ -4337,6 +4337,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 970569313930788201, guid: c1a55c9926c8d4843a76621513810efd,
+        type: 3}
+      propertyPath: networkId.a
+      value: 3132501912
+      objectReference: {fileID: 0}
+    - target: {fileID: 970569313930788201, guid: c1a55c9926c8d4843a76621513810efd,
+        type: 3}
+      propertyPath: networkId.b
+      value: 4018354166
+      objectReference: {fileID: 0}
+    - target: {fileID: 970569313930788201, guid: c1a55c9926c8d4843a76621513810efd,
+        type: 3}
+      propertyPath: __serializedGoid
+      value: GlobalObjectId_V1-2-775a5366984e5bf418fe14f12fd14a6f-970569313930788201-4904968253623985163
+      objectReference: {fileID: 0}
     - target: {fileID: 4904968254921343994, guid: c1a55c9926c8d4843a76621513810efd,
         type: 3}
       propertyPath: m_RootOrder
