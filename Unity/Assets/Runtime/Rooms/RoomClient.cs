@@ -682,32 +682,32 @@ namespace Ubiq.Rooms
             actions.ForEach(a => a());
             actions.Clear();
 
-            if (me.log.Count > 0)
-            {
-                _appendPeerPropertiesArgs.keys.Clear();
-                _appendPeerPropertiesArgs.values.Clear();
-                while (me.log.TryPop(out var key, out var value))
-                {
-                    _appendPeerPropertiesArgs.keys.Add(key);
-                    _appendPeerPropertiesArgs.values.Add(value);
-                }
-
-                SendToServer("AppendPeerProperties", _appendPeerPropertiesArgs);
-                OnPeerUpdated.Invoke(me);
-            }
-
-            if (room.log.Count > 0)
-            {
-                _appendRoomPropertiesArgs.keys.Clear();
-                _appendRoomPropertiesArgs.values.Clear();
-                while (room.log.TryPop(out var key, out var value))
-                {
-                    _appendRoomPropertiesArgs.keys.Add(key);
-                    _appendRoomPropertiesArgs.values.Add(value);
-                }
-
-                SendToServer("AppendRoomProperties", _appendRoomPropertiesArgs);
-            }
+            // if (me.log.Count > 0)
+            // {
+            //     _appendPeerPropertiesArgs.keys.Clear();
+            //     _appendPeerPropertiesArgs.values.Clear();
+            //     while (me.log.TryPop(out var key, out var value))
+            //     {
+            //         _appendPeerPropertiesArgs.keys.Add(key);
+            //         _appendPeerPropertiesArgs.values.Add(value);
+            //     }
+            //
+            //     SendToServer("AppendPeerProperties", _appendPeerPropertiesArgs);
+            //     OnPeerUpdated.Invoke(me);
+            // }
+            //
+            // if (room.log.Count > 0)
+            // {
+            //     _appendRoomPropertiesArgs.keys.Clear();
+            //     _appendRoomPropertiesArgs.values.Clear();
+            //     while (room.log.TryPop(out var key, out var value))
+            //     {
+            //         _appendRoomPropertiesArgs.keys.Add(key);
+            //         _appendRoomPropertiesArgs.values.Add(value);
+            //     }
+            //
+            //     SendToServer("AppendRoomProperties", _appendRoomPropertiesArgs);
+            // }
 
             if (heartbeatSent > HeartbeatInterval)
             {

@@ -47,6 +47,8 @@ namespace Ubiq.Messaging
 
         private static NetworkScene rootNetworkScene;
 
+        // The scene sends out messages only if this is true
+        public bool isSendingMessage = true;
         private void Awake()
         {
             if (transform.parent == null)
@@ -186,6 +188,9 @@ namespace Ubiq.Messaging
 
         private void Send(ReferenceCountedMessage message)
         {
+            if (!isSendingMessage)
+                return;
+
             foreach (var c in connections)
             {
                 message.Acquire();
