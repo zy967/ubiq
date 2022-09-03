@@ -3,174 +3,163 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using System.Linq;
-public struct CellBorderEventInfo
+
+namespace SpatialModel
 {
-    public CellBorderPoint borderPoint;
-    public GameObject go;
-    public string objectType;
-}
+	public struct CellBorderEventInfo
+	{
+		public CellBorderPoint BorderPoint;
+		public GameObject GameObject;
+		public string ObjectType;
+	}
 
-[RequireComponent(typeof(Collider))]
-public class CellBorderPoint: MonoBehaviour
-{
-    [SerializeField]
-    public Cell fromCell;
-    [SerializeField]
-    public Cell toCell;
+	[RequireComponent(typeof(Collider))]
+	public class CellBorderPoint : MonoBehaviour
+	{
+		[SerializeField] public Cell fromCell;
+		[SerializeField] public Cell toCell;
 
-    [HideInInspector]
-    public float distanceToCell; //Only used in HexCell when creating Borders automatically
+		[HideInInspector] public float distanceToCell; //Only used in HexCell when creating Borders automatically
 
-    public float ExitDelay = 5.0f;
+		public float exitDelay;
 
-    public class CellBorderEvent : UnityEvent<CellBorderEventInfo> { };
+		public class CellBorderEvent : UnityEvent<CellBorderEventInfo>
+		{
+		};
 
-    public CellBorderEvent OnBorderTriggerEntered;
-    public CellBorderEvent OnBorderTriggerExited;
+		public CellBorderEvent OnBorderTriggerEntered;
+		public CellBorderEvent OnBorderTriggerExited;
 
-    Dictionary<string, GameObject> triggeredObjects = new Dictionary<string, GameObject>();
-    Dictionary<string, IEnumerator> removeCoroutines = new Dictionary<string, IEnumerator>();
+		Dictionary<string, GameObject> triggeredObjects = new Dictionary<string, GameObject>();
+		Dictionary<string, IEnumerator> removeCoroutines = new Dictionary<string, IEnumerator>();
 
-    void Awake()
-    {
-        if(OnBorderTriggerEntered == null)
-        {
-            OnBorderTriggerEntered = new CellBorderEvent();
-        }
+		void Awake()
+		{
+			OnBorderTriggerEntered = new CellBorderEvent();
+			OnBorderTriggerExited = new CellBorderEvent();
 
-        if(OnBorderTriggerExited == null)
-        {
-            OnBorderTriggerExited = new CellBorderEvent();
-        }
+			enabled = false;
+		}
 
-        this.enabled = false;   
-    }
+		private void Start()
+		{
+			name = "Border To Cell " + toCell.Name;
+			GetComponent<Collider>().isTrigger = true;
+		}
 
-    void Start()
-    {
-        this.name = "Border To Cell " + toCell.Name;
-        GetComponent<Collider>().isTrigger = true;
-    }
+		private void OnDisable()
+		{
+			triggeredObjects.Clear();
+			foreach (var item in removeCoroutines.Values)
+			{
+				StopCoroutine(item);
+			}
 
-    void OnDisable() 
-    {
-        triggeredObjects.Clear();
-        foreach(var item in removeCoroutines.Values)
-        {
-            StopCoroutine(item);
-        }
-        removeCoroutines.Clear();
-    }
+			removeCoroutines.Clear();
+		}
 
-    void OnEnable()
-    {
-        GetComponent<Collider>().enabled = true;
-    }
+		private void OnTriggerEnter(Collider other)
+		{
+			bool invokeEvent = false;
 
-    void OnTriggerEnter(Collider other)
-    {
-        bool playerTriggered = (other.name == "Player" || other.tag == "Player");
-        bool invokeEvent = false;
+			CellBorderEventInfo cellBorderEventInfo = new CellBorderEventInfo
+			{
+				BorderPoint = this,
+				GameObject = other.gameObject
+			};
+			if (other.CompareTag("Player"))
+			{
+				// Debug.Log("Player Entered Border: " + this.name);
+				if (removeCoroutines.ContainsKey("Player"))
+				{
+					// Debug.Log("Stop Player Remove Coroutine");
+					StopCoroutine(removeCoroutines["Player"]);
+				}
 
-        CellBorderEventInfo cellBorderEventInfo = new CellBorderEventInfo {
-                                                    borderPoint = this,
-                                                    go = other.gameObject
-                                                };
+				if (!triggeredObjects.ContainsKey("Player"))
+				{
+					// Debug.Log("Invoke Event For Player");
+					invokeEvent = true;
+					triggeredObjects.Add("Player", other.gameObject);
+					cellBorderEventInfo.ObjectType = "Player";
+				}
+			}
+			else
+			{
+				RoomObject roomObject =
+					other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
+						.FirstOrDefault() as RoomObject;
+				if (roomObject != null)
+				{
+					if (removeCoroutines.ContainsKey(roomObject.networkId.ToString()))
+					{
+						// Debug.Log("Stop Client Agent Remove Coroutine");
+						StopCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
+					}
 
-        if(playerTriggered)
-        {
-            // Debug.Log("Player Entered Border: " + this.name);
-            if(removeCoroutines.ContainsKey("Player"))
-            {
-                // Debug.Log("Stop Player Remove Coroutine");
-                StopCoroutine(removeCoroutines["Player"]);
-            }
-            if(!triggeredObjects.ContainsKey("Player"))
-            {
-                // Debug.Log("Invoke Event For Player");
-                invokeEvent = true;
-                triggeredObjects.Add("Player", other.gameObject);
-                cellBorderEventInfo.objectType = "Player";
-            }
-        }
-        else
-        {
-            RoomObject roomObject = other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
-            if(roomObject != null)
-            {
-                if(removeCoroutines.ContainsKey(roomObject.networkId.ToString()))
-                {
-                    // Debug.Log("Stop Client Agent Remove Coroutine");
-                    StopCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
-                }
-                // Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
-                if(!triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
-                {
-                    invokeEvent = true;
-                    triggeredObjects.Add(roomObject.networkId.ToString(), other.gameObject);
-                    cellBorderEventInfo.objectType = "RoomObject";
-                }
-            }
+					// Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
+					if (!triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
+					{
+						invokeEvent = true;
+						triggeredObjects.Add(roomObject.networkId.ToString(), other.gameObject);
+						cellBorderEventInfo.ObjectType = "RoomObject";
+					}
+				}
+			}
 
-        }
+			if (invokeEvent)
+			{
+				OnBorderTriggerEntered.Invoke(cellBorderEventInfo);
+			}
+		}
 
-        if(invokeEvent)
-        {   
-            OnBorderTriggerEntered.Invoke(cellBorderEventInfo);
-        }
-    }
+		void OnTriggerExit(Collider other)
+		{
+			if (other.CompareTag("Player"))
+			{
+				// Debug.Log("Player Exited Border: " + this.name);
+				if (triggeredObjects.ContainsKey("Player"))
+				{
+					// Debug.Log("Add Coroutine For Removing Player");
+					removeCoroutines["Player"] = WaitAndRemove(exitDelay, "Player", "Player");
+					StartCoroutine(removeCoroutines["Player"]);
+				}
+			}
+			else
+			{
+				RoomObject roomObject =
+					other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
+						.FirstOrDefault() as RoomObject;
+				if (roomObject != null)
+				{
+					// Debug.Log("Room Object Exited Border: " + this.name);
+					if (triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
+					{
+						// Debug.Log("Add Coroutine For Removing Client Agent");
+						removeCoroutines[roomObject.networkId.ToString()] =
+							WaitAndRemove(0, roomObject.networkId.ToString(), "RoomObject");
+						StartCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
+					}
+				}
+			}
+		}
 
-    void OnTriggerExit(Collider other)
-    {
-        CellBorderEventInfo cellBorderEventInfo = new CellBorderEventInfo {
-                                                    borderPoint = this,
-                                                    go = other.gameObject
-                                                };
-        bool playerTriggered = (other.name == "Player" || other.tag == "Player");
+		// TODO: error here "key is null"
+		// maybe caused by the delay with multiple triggering
+		public IEnumerator WaitAndRemove(float waitTime, string key, string type)
+		{
+			yield return new WaitForSeconds(waitTime);
 
-        if(playerTriggered)
-        {
-            // Debug.Log("Player Exited Border: " + this.name);
-            if(triggeredObjects.ContainsKey("Player"))
-            {
-                // Debug.Log("Add Coroutine For Removing Player");
-                removeCoroutines["Player"] = WaitAndRemove(ExitDelay, "Player", "Player");
-                StartCoroutine(removeCoroutines["Player"]);
-            }
-        }
-        else
-        {
-            RoomObject roomObject = other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
-            if(roomObject != null)
-            {
-                // Debug.Log("Room Object Exited Border: " + this.name);
-                if(triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
-                {
-                    // Debug.Log("Add Coroutine For Removing Client Agent");
-                    removeCoroutines[roomObject.networkId.ToString()] = WaitAndRemove(0, roomObject.networkId.ToString(), "RoomObject");
-                    StartCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
-                }
-            }
+			// Debug.Log("Remove Player Invoke");
 
-        }
+			OnBorderTriggerExited.Invoke(new CellBorderEventInfo
+			{
+				BorderPoint = this,
+				GameObject = triggeredObjects[key],
+				ObjectType = type
+			});
 
-        
-        
-    }
-
-    public IEnumerator WaitAndRemove(float waitTime, string key, string type)
-    {
-        yield return new WaitForSeconds(waitTime);
-
-        // Debug.Log("Remove Player Invoke");
-
-        OnBorderTriggerExited.Invoke(new CellBorderEventInfo {
-            borderPoint = this,
-            go = triggeredObjects[key],
-            objectType = type
-        });
-
-        triggeredObjects.Remove(key);
-        
-    }
+			triggeredObjects.Remove(key);
+		}
+	}
 }

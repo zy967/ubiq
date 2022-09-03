@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.AI;
 
-namespace Spatial
+namespace SpatialModel
 {
     /// <summary>
     /// Based on previous work in Sample.Bot.BotAgent

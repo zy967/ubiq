@@ -10,6 +10,7 @@ using Ubiq.Rooms.Messages;
 using Ubiq.Samples;
 using System.Linq;
 using System;
+using SpatialModel;
 using Ubiq.Spawning;
 
 
@@ -475,7 +476,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkSpawnable
 
     public virtual void OnObjectLeftCell(Cell cell)
     {
-        if(Me.GetRoomObjectInfo().Room.Me.uuid == cell.CellUUID)
+        if(Me.GetRoomObjectInfo().Room.Me.uuid == cell.CellUuid)
         {
             timeRemaining = timeToDestroyObject;
             notInRoom = true;
@@ -802,7 +803,7 @@ public abstract class RoomObject : MonoBehaviour, INetworkSpawnable
         RoomDictionaryInfoMessage<IRoomObjectState> objectInfo = JsonUtility.FromJson<RoomDictionaryInfoMessage<IRoomObjectState>>(jsonObjectInfo);
         Debug.Log("RoomObject: ObjectSpawned: jsonObjectInfo: " + jsonObjectInfo);
         SetRoomObjectInfo(objectInfo);
-        
+
         Me.SetRoom(room);
         RoomName = room.name;
     }
