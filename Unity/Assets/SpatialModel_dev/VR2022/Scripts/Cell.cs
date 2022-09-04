@@ -72,11 +72,11 @@ namespace SpatialModel
 		{
 		};
 
-		public CellEvent OnEnteredCell;
-		public CellEvent OnLeftCell;
+		public CellEvent OnEntered;
+		public CellEvent OnExist;
 
-		public CellEvent OnCloseToCellBorder;
-		public CellEvent OnNotCloseToCellBorder;
+		public CellEvent OnCloseToBorder;
+		public CellEvent OnNotCloseToBorder;
 
 		public string CellUuid => GetCellUuid(this);
 
@@ -98,14 +98,7 @@ namespace SpatialModel
 
 		// For debug visualisation
 		protected Canvas CellCanvas;
-
 		protected Text CellLabel;
-
-		// Keeps track of which objects have fired which triggers
-		// to make sure cell entered/left events are invoked only at appropriate times
-		protected Dictionary<string, List<string>> activeTriggers = new Dictionary<string, List<string>>();
-
-		protected List<string> activeBorders = new List<string>();
 
 		protected Dictionary<string, ICell> _neighbors;
 		public Dictionary<string, ICell> Neighbors => _neighbors;
@@ -119,31 +112,16 @@ namespace SpatialModel
 		[SerializeField] public List<Cell> neighborCellObjects = new List<Cell>();
 
 		// List of neighboring cell game objects, these need to be set in the editor
-		[SerializeField] public List<CellBorderPoint> borderPointObjects;
+		// [SerializeField] public List<CellBorderPoint> borderPointObjects;
 
 		public Dictionary<string, CellBorderPoint> BorderPoints = new Dictionary<string, CellBorderPoint>();
 
 		protected void SetupCell()
 		{
-			if (OnEnteredCell == null)
-			{
-				OnEnteredCell = new CellEvent();
-			}
-
-			if (OnLeftCell == null)
-			{
-				OnLeftCell = new CellEvent();
-			}
-
-			if (OnCloseToCellBorder == null)
-			{
-				OnCloseToCellBorder = new CellEvent();
-			}
-
-			if (OnNotCloseToCellBorder == null)
-			{
-				OnNotCloseToCellBorder = new CellEvent();
-			}
+			OnEntered = new CellEvent();
+			OnExist = new CellEvent();
+			OnCloseToBorder = new CellEvent();
+			OnNotCloseToBorder = new CellEvent();
 
 			Grid = GetComponentInParent<IGrid>();
 
@@ -167,12 +145,6 @@ namespace SpatialModel
 				_neighbors[cell.CellUuid] = cell;
 			}
 
-			foreach (CellBorderPoint borderPoint in borderPointObjects)
-			{
-				borderPoint.fromCell = this;
-				BorderPoints[borderPoint.toCell.CellUuid] = borderPoint;
-			}
-
 			if (CellCanvas != null)
 			{
 				CellLabel.text = ((CellCoordinates) Coordinates).ToStringOnSeparateLines();
@@ -185,15 +157,6 @@ namespace SpatialModel
 			}
 		}
 
-		public void SetBorderPointsActive(bool active)
-		{
-			foreach (var item in BorderPoints.Values)
-			{
-				item.enabled = active;
-			}
-		}
-
-
 		// Handle cell trigger entered events, if a new object has entered, invokes OnCellEntered event
 		protected virtual void CellTriggerEntered(CellTriggerInfo triggerInfo)
 		{
@@ -203,46 +166,10 @@ namespace SpatialModel
 				Object = triggerInfo.TriggeredObject
 			};
 
-			bool invokeEvent = false;
-			bool playerTriggered = (triggerInfo.TriggeredObject.name == "Player" ||
-			                        triggerInfo.TriggeredObject.CompareTag("Player"));
-			if (playerTriggered) //Player triggered
+			if (triggerInfo.TriggeredObject.CompareTag("Player")) //Player triggered
 			{
-				if (!activeTriggers.ContainsKey("Player"))
-				{
-					invokeEvent = true;
-					activeTriggers["Player"] = new List<string>();
-					cellEventInfo.ObjectType = "Player";
-				}
-
-				activeTriggers["Player"].Add(triggerInfo.Trigger.name);
-			}
-			else //Something else triggered
-			{
-				RoomObject roomObject =
-					triggerInfo.TriggeredObject.gameObject.GetComponentsInChildren<MonoBehaviour>()
-						.Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
-				if (roomObject != null)
-				{
-					// Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
-					if (!activeTriggers.ContainsKey(roomObject.networkId.ToString()))
-					{
-						// Debug.Log("HexCell: new object, create new empty list with key: " + roomObject.networkId.ToString());
-						roomObject.OnObjectDestroyed.AddListener(OnObjectDestroyed);
-						invokeEvent = true;
-						activeTriggers[roomObject.networkId.ToString()] = new List<string>();
-						cellEventInfo.ObjectType = "RoomObject";
-					}
-
-					// Debug.Log("HexCell: add trigger: " + triggerInfo.trigger.name + " to active triggers for the object");
-					activeTriggers[roomObject.networkId.ToString()].Add(triggerInfo.Trigger.name);
-				}
-			}
-
-			if (invokeEvent)
-			{
-				// Debug.Log("Hex Cell On Trigger Enter: object: " +triggerInfo.triggeredObject.name + ", entered cell: " + this.name);
-				OnEnteredCell.Invoke(cellEventInfo);
+				cellEventInfo.ObjectType = "Player";
+				OnEntered.Invoke(cellEventInfo);
 			}
 		}
 
@@ -250,83 +177,16 @@ namespace SpatialModel
 		// Player leaving a cell does not cause an event to be invoked, player moving from one cell to another is handled only by OnCellEntered events
 		protected virtual void CellTriggerExited(CellTriggerInfo triggerInfo)
 		{
-			bool playerTriggered = (triggerInfo.TriggeredObject.name == "Player" ||
-			                        triggerInfo.TriggeredObject.CompareTag("Player"));
-			if (playerTriggered)
-			{
-				// As player may already stay in a trigger at initial state, the key may not always exist
-				if (activeTriggers?["Player"]?.Remove(triggerInfo.Trigger.name) != null)
-				{
-					 if (activeTriggers["Player"].Count == 0)
-					 {
-						 activeTriggers.Remove("Player");
-						 // Debug.Log("Hex Cell On Trigger Exit: Player, left cell: " + this.name);
-					 }
-				}
-			}
-			else //Something else triggered
-			{
-				RoomObject roomObject =
-					triggerInfo.TriggeredObject.gameObject.GetComponentsInChildren<MonoBehaviour>()
-						.Where(mb => mb is RoomObject).FirstOrDefault() as RoomObject;
-				if (roomObject != null && activeTriggers.ContainsKey(roomObject.networkId.ToString()))
-				{
-					activeTriggers[roomObject.networkId.ToString()].Remove(triggerInfo.Trigger.name);
-					// Debug.Log("Hex Cell On Trigger Exit: " + triggerInfo.triggeredObject.name + " left trigger: " + triggerInfo.trigger.name);
-					if (activeTriggers[roomObject.networkId.ToString()].Count == 0)
-					{
-						activeTriggers.Remove(roomObject.networkId.ToString());
-						OnLeftCell.Invoke(new CellEventInfo
-						{
-							Cell = this,
-							Object = triggerInfo.TriggeredObject,
-							ObjectType = "RoomObject"
-						});
-						// Debug.Log("Hex Cell On Trigger Exit: " + triggerInfo.triggeredObject.name + " left cell: " + this.name);
-					}
-				}
-			}
-			// UpdateActiveState();
-		}
-
-		protected virtual void OnBorderEnter(CellBorderEventInfo info)
-		{
-			if (!activeBorders.Contains(info.BorderPoint.toCell.CellUuid))
-			{
-				activeBorders.Add(info.BorderPoint.toCell.CellUuid);
-			}
-
-			OnCloseToCellBorder.Invoke(new CellEventInfo
-			{
-				Cell = info.BorderPoint.toCell,
-				Object = info.GameObject,
-				ObjectType = info.ObjectType
-			});
-		}
-
-		protected virtual void OnBorderExit(CellBorderEventInfo info)
-		{
-			activeBorders.Remove(info.BorderPoint.toCell.CellUuid);
-			OnNotCloseToCellBorder.Invoke(new CellEventInfo
-			{
-				Cell = info.BorderPoint.toCell,
-				Object = info.GameObject,
-				ObjectType = info.ObjectType
-			});
 		}
 
 		protected virtual void OnObjectDestroyed(RoomObjectInfo objectInfo)
 		{
 			// Debug.Log("HexCell: " + name + " OnObjectDestroyed: " + objectInfo.Name);
-			if (activeTriggers.ContainsKey(objectInfo.Id.ToString()))
+			OnExist.Invoke(new CellEventInfo
 			{
-				activeTriggers.Remove(objectInfo.Id.ToString());
-				OnLeftCell.Invoke(new CellEventInfo
-				{
-					Cell = this,
-					ObjectType = "RoomObject"
-				});
-			}
+				Cell = this,
+				ObjectType = "RoomObject"
+			});
 		}
 
 		public static string GetCellUuid(ICell cell)

@@ -47,19 +47,19 @@ namespace SpatialModel
 
 		HexCell CreateCell(int x, int z)
 		{
-			Vector3 position = new Vector3((x + z * 0.5f - (int) (z / 2.0f)) * (InnerRadius * 2f), 0f,
-				z * (outerRadius * 1.5f));
 			HexCell cell = Instantiate(cellPrefab, transform, false);
 			cell.Grid = this;
-			cell.transform.localPosition = position;
+			cell.transform.localPosition = new Vector3((x + z * 0.5f - (int) (z / 2.0f)) * (InnerRadius * 2f), 0f,
+				z * (outerRadius * 1.5f));
 			cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
 			cell.name = "Hex Cell " + ((HexCoordinates) cell.Coordinates).ToString();
-			var key = Cell.GetCellUuid(cell);
-			CellDictionary[key] = cell;
-			cell.OnEnteredCell.AddListener(OnCellEntered);
-			cell.OnLeftCell.AddListener(OnLeftCell);
-			cell.OnCloseToCellBorder.AddListener(OnBorder);
-			cell.OnNotCloseToCellBorder.AddListener(OnNotBorder);
+			CellDictionary[Cell.GetCellUuid(cell)] = cell;
+
+			cell.OnEntered.AddListener(OnCellEntered);
+			cell.OnExist.AddListener(OnLeftCell);
+			cell.OnCloseToBorder.AddListener(OnBorder);
+			cell.OnNotCloseToBorder.AddListener(OnNotBorder);
+
 			cell.SetVisible(showCells);
 			return cell;
 		}

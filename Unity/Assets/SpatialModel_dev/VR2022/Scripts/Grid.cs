@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 namespace SpatialModel
@@ -25,20 +24,14 @@ namespace SpatialModel
 
 		protected string PlayerCellName; // For inspector view debugging
 
-		protected ICell _PlayerCell;
+		protected ICell _playerCell;
 		public ICell PlayerCell
 		{
-			get => _PlayerCell;
+			get => _playerCell;
 			set
 			{
-				 if (_PlayerCell != null)
-				 {
-					 ((Cell) _PlayerCell).SetBorderPointsActive(false);
-				 }
-
-				 _PlayerCell = value;
-				 ((Cell) _PlayerCell).SetBorderPointsActive(true);
-				 PlayerCellName = _PlayerCell.Name;
+				 _playerCell = value;
+				 PlayerCellName = _playerCell.Name;
 			}
 		}
 
@@ -63,10 +56,10 @@ namespace SpatialModel
 			foreach (var item in GetComponentsInChildren<ICell>())
 			{
 				 CellDictionary[item.CellUuid] = item;
-				 ((Cell) item).OnEnteredCell.AddListener(OnCellEntered);
-				 ((Cell) item).OnLeftCell.AddListener(OnLeftCell);
-				 ((Cell) item).OnCloseToCellBorder.AddListener(OnBorder);
-				 ((Cell) item).OnNotCloseToCellBorder.AddListener(OnNotBorder);
+				 ((Cell) item).OnEntered.AddListener(OnCellEntered);
+				 ((Cell) item).OnExist.AddListener(OnLeftCell);
+				 ((Cell) item).OnCloseToBorder.AddListener(OnBorder);
+				 ((Cell) item).OnNotCloseToBorder.AddListener(OnNotBorder);
 			}
 		}
 
@@ -94,7 +87,7 @@ namespace SpatialModel
 
 		protected virtual void OnLeftCell(CellEventInfo info)
 		{
-			// Debug.Log("Cell: OnLeftCell: " + info.cell.gameObject.name);
+			// Debug.Log("Cell: OnExist: " + info.cell.gameObject.name);
 			if (info.Object != null)
 			{
 				 OnObjectLeftCell.Invoke(info);

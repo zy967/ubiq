@@ -62,7 +62,6 @@ namespace SpatialModel
 
 	public class HexCell : Cell
 	{
-		public CellBorderPoint cellBorderPointPrefab;
 		private HexMesh hexMesh;
 		private new HexGrid Grid => (HexGrid) base.Grid;
 
@@ -75,7 +74,7 @@ namespace SpatialModel
 			if (base.Grid != null && !(base.Grid is HexGrid))
 			{
 				Coordinates = new CellCoordinates(transform.position);
-				name = "Hex Cell " + Coordinates.ToString();
+				name = "Hex Cell " + Coordinates;
 			}
 		}
 
@@ -110,7 +109,7 @@ namespace SpatialModel
 					trigger.OnTriggerEntered.AddListener(CellTriggerEntered);
 					trigger.OnTriggerExited.AddListener(CellTriggerExited);
 
-					CreateBorderPoints(trigger);
+					// CreateBorderPoints(trigger);
 
 					idx++;
 				}
@@ -123,71 +122,10 @@ namespace SpatialModel
 			}
 		}
 
-		private void CreateBorderPoints(CellTrigger trigger)
-		{
-			Vector3[] borderPoints = trigger.GetBorderPoints();
-			foreach (var borderPoint in borderPoints)
-			{
-				var distanceToNeighborCell = float.MaxValue;
-
-				foreach (var neighbor in _neighbors)
-				{
-					var distance = Vector3.Distance(((HexCell) neighbor.Value).transform.position, borderPoint);
-					if (distance < distanceToNeighborCell)
-					{
-						CellBorderPoint cellBorderPoint;
-						if (BorderPoints.ContainsKey(neighbor.Key) &&
-						    BorderPoints[neighbor.Key].distanceToCell < distance)
-						{
-							continue;
-						}
-
-						if (BorderPoints.ContainsKey(neighbor.Key))
-						{
-							cellBorderPoint = BorderPoints[neighbor.Key];
-						}
-						else
-						{
-							cellBorderPoint = Instantiate(cellBorderPointPrefab);
-							cellBorderPoint.enabled = false;
-							cellBorderPoint.fromCell = this;
-							cellBorderPoint.OnBorderTriggerEntered.AddListener(OnBorderEnter);
-							cellBorderPoint.OnBorderTriggerExited.AddListener(OnBorderExit);
-							cellBorderPoint.gameObject.AddComponent<BoxCollider>();
-						}
-
-						cellBorderPoint.transform.parent = transform;
-
-						BoxCollider borderCollider = cellBorderPoint.gameObject.GetComponent<BoxCollider>();
-						borderCollider.enabled = false;
-						Vector3 colliderSize = trigger.gameObject.GetComponent<BoxCollider>().size;
-						var triggerTransform = trigger.transform;
-						var triggerLocalScale = triggerTransform.localScale;
-
-						colliderSize.x *= triggerLocalScale.x * 1.0f;
-						colliderSize.y *= triggerLocalScale.y;
-						colliderSize.z *= (triggerLocalScale.z / 5);
-						borderCollider.size = colliderSize;
-
-						Vector3 newPosition = Vector3.MoveTowards(borderPoint, transform.position, colliderSize.z / 2);
-						newPosition.y = triggerTransform.position.y;
-						cellBorderPoint.transform.position = newPosition;
-						borderCollider.transform.rotation = triggerTransform.rotation;
-
-						cellBorderPoint.toCell = (Cell) neighbor.Value;
-						cellBorderPoint.name = "Border To Cell " + cellBorderPoint.toCell.Name;
-						cellBorderPoint.distanceToCell = distance;
-						distanceToNeighborCell = distance;
-						BorderPoints[neighbor.Key] = cellBorderPoint;
-						SetBorderPointsActive(false);
-					}
-				}
-			}
-		}
-
 		public void SetVisible(bool visible)
 		{
 			hexMesh.GetComponent<MeshRenderer>().enabled = visible;
+			CellCanvas.enabled = visible;
 		}
 	}
 }
