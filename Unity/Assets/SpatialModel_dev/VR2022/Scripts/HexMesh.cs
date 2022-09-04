@@ -7,8 +7,8 @@ namespace SpatialModel_dev.VR2022.Scripts
 	public class HexMesh : MonoBehaviour
 	{
 		public Mesh hexMesh;
-		private List<Vector3> vertices;
 		private List<int> triangles;
+		private List<Vector3> vertices;
 
 		private void Awake()
 		{
@@ -24,12 +24,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 			vertices.Clear();
 			triangles.Clear();
 
-			for (int i = 0; i < 6; i++)
-			{
+			for (var i = 0; i < 6; i++)
 				AddTriangle(Vector3.zero,
 					hexGrid.Corners[i],
 					hexGrid.Corners[i + 1]);
-			}
 
 			hexMesh.vertices = vertices.ToArray();
 			hexMesh.triangles = triangles.ToArray();
@@ -38,7 +36,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 
 		private void AddTriangle(Vector3 v1, Vector3 v2, Vector3 v3)
 		{
-			int vertexIndex = vertices.Count;
+			var vertexIndex = vertices.Count;
 			vertices.Add(v1);
 			vertices.Add(v2);
 			vertices.Add(v3);

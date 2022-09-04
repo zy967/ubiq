@@ -3,39 +3,35 @@ using UnityEngine;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-    public class Chest : MonoBehaviour, IUseable
-    {
+	public class Chest : MonoBehaviour, IUseable
+	{
+		private Animator animator;
 
-        Animator animator;
+		private bool open;
 
-        bool open = false;
+		private void Awake()
+		{
+			animator = GetComponent<Animator>();
+		}
 
-        void Awake()
-        {
-            animator = GetComponent<Animator>();
-        }
+		// Start is called before the first frame update
+		private void Start()
+		{
+		}
 
-        // Start is called before the first frame update
-        void Start()
-        {
-        
-        }
+		// Update is called once per frame
+		private void Update()
+		{
+		}
 
-        // Update is called once per frame
-        void Update()
-        {
-        
-        }
+		public void Use(Hand controller)
+		{
+			open = !open;
+			animator.SetBool("OpenChest", open);
+		}
 
-        public void Use(Hand controller)
-        {
-            open = !open;
-            animator.SetBool("OpenChest", open);
-        }
-
-        public void UnUse(Hand controller)
-        {
-        
-        }
-    }
+		public void UnUse(Hand controller)
+		{
+		}
+	}
 }

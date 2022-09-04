@@ -18,7 +18,7 @@
 //     public List<RoomInfo> neighborRooms = new List<RoomInfo>();
 
 //     public GridManager gridManager;
-    
+
 
 //     // Start is called before the first frame update
 //     void Start()
@@ -70,7 +70,7 @@
 //         // Join the new room, leaves the current room in the process
 //         // If I'm already observing to the new room, also stops observing it
 //         client.Join(room.JoinCode);
-        
+
 //         return;
 //     }
 
@@ -87,7 +87,7 @@
 //             // Debug.Log("GridClient: OnJoinedRoom: Room uuid not the same as player cell uuid");
 //             return;
 //         }
-        
+
 //         if(room.UUID == "" || room.UUID == null)
 //         {
 //             // Debug.Log("GridClient: OnJoinedRoom: Room uuid null");
@@ -102,3 +102,4 @@
 //         JoinRoom((RoomInfo) room);
 //     }
 // }
+

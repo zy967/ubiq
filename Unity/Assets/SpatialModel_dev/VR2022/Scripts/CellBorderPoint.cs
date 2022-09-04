@@ -6,13 +6,6 @@ using UnityEngine.Events;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-	public struct CellBorderEventInfo
-	{
-		public CellBorderPoint BorderPoint;
-		public GameObject GameObject;
-		public string ObjectType;
-	}
-
 	[RequireComponent(typeof(Collider))]
 	public class CellBorderPoint : MonoBehaviour
 	{
@@ -23,17 +16,13 @@ namespace SpatialModel_dev.VR2022.Scripts
 
 		public float exitDelay;
 
-		public class CellBorderEvent : UnityEvent<CellBorderEventInfo>
-		{
-		};
-
 		public CellBorderEvent OnBorderTriggerEntered;
 		public CellBorderEvent OnBorderTriggerExited;
+		private readonly Dictionary<string, IEnumerator> removeCoroutines = new Dictionary<string, IEnumerator>();
 
-		Dictionary<string, GameObject> triggeredObjects = new Dictionary<string, GameObject>();
-		Dictionary<string, IEnumerator> removeCoroutines = new Dictionary<string, IEnumerator>();
+		private readonly Dictionary<string, GameObject> triggeredObjects = new Dictionary<string, GameObject>();
 
-		void Awake()
+		private void Awake()
 		{
 			OnBorderTriggerEntered = new CellBorderEvent();
 			OnBorderTriggerExited = new CellBorderEvent();
@@ -50,19 +39,16 @@ namespace SpatialModel_dev.VR2022.Scripts
 		private void OnDisable()
 		{
 			triggeredObjects.Clear();
-			foreach (var item in removeCoroutines.Values)
-			{
-				StopCoroutine(item);
-			}
+			foreach (var item in removeCoroutines.Values) StopCoroutine(item);
 
 			removeCoroutines.Clear();
 		}
 
 		private void OnTriggerEnter(Collider other)
 		{
-			bool invokeEvent = false;
+			var invokeEvent = false;
 
-			CellBorderEventInfo cellBorderEventInfo = new CellBorderEventInfo
+			var cellBorderEventInfo = new CellBorderEventInfo
 			{
 				BorderPoint = this,
 				GameObject = other.gameObject
@@ -71,10 +57,8 @@ namespace SpatialModel_dev.VR2022.Scripts
 			{
 				// Debug.Log("Player Entered Border: " + this.name);
 				if (removeCoroutines.ContainsKey("Player"))
-				{
 					// Debug.Log("Stop Player Remove Coroutine");
 					StopCoroutine(removeCoroutines["Player"]);
-				}
 
 				if (!triggeredObjects.ContainsKey("Player"))
 				{
@@ -86,16 +70,14 @@ namespace SpatialModel_dev.VR2022.Scripts
 			}
 			else
 			{
-				RoomObject roomObject =
+				var roomObject =
 					other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
 						.FirstOrDefault() as RoomObject;
 				if (roomObject != null)
 				{
 					if (removeCoroutines.ContainsKey(roomObject.networkId.ToString()))
-					{
 						// Debug.Log("Stop Client Agent Remove Coroutine");
 						StopCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
-					}
 
 					// Debug.Log("HexCell: roomObject object " + triggerInfo.triggeredObject.name + " entered trigger: " + triggerInfo.trigger.name);
 					if (!triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
@@ -107,13 +89,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 				}
 			}
 
-			if (invokeEvent)
-			{
-				OnBorderTriggerEntered.Invoke(cellBorderEventInfo);
-			}
+			if (invokeEvent) OnBorderTriggerEntered.Invoke(cellBorderEventInfo);
 		}
 
-		void OnTriggerExit(Collider other)
+		private void OnTriggerExit(Collider other)
 		{
 			if (other.CompareTag("Player"))
 			{
@@ -127,11 +106,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 			}
 			else
 			{
-				RoomObject roomObject =
+				var roomObject =
 					other.gameObject.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
 						.FirstOrDefault() as RoomObject;
 				if (roomObject != null)
-				{
 					// Debug.Log("Room Object Exited Border: " + this.name);
 					if (triggeredObjects.ContainsKey(roomObject.networkId.ToString()))
 					{
@@ -140,7 +118,6 @@ namespace SpatialModel_dev.VR2022.Scripts
 							WaitAndRemove(0, roomObject.networkId.ToString(), "RoomObject");
 						StartCoroutine(removeCoroutines[roomObject.networkId.ToString()]);
 					}
-				}
 			}
 		}
 
@@ -160,6 +137,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 			});
 
 			triggeredObjects.Remove(key);
+		}
+
+		public class CellBorderEvent : UnityEvent<CellBorderEventInfo>
+		{
 		}
 	}
 }

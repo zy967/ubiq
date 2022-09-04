@@ -8,113 +8,74 @@ using UnityEngine.UI;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-	public interface ICellCoordinates
-	{
-		int X { get; }
-		int Y { get; }
-		int Z { get; }
-	}
-
-	[Serializable]
-	public struct CellCoordinates : ICellCoordinates
-	{
-		[SerializeField] private int x, y, z;
-
-		public int X => x;
-		public int Y => y;
-		public int Z => z;
-
-		public CellCoordinates(int x, int y, int z)
-		{
-			this.x = x;
-			this.y = y;
-			this.z = z;
-		}
-
-		public CellCoordinates(Vector3 coord)
-		{
-			x = (int) coord.x;
-			y = (int) coord.y;
-			z = (int) coord.z;
-		}
-
-		public override string ToString()
-		{
-			return $"({X.ToString()}, {Y.ToString()}, {Z.ToString()})";
-		}
-
-		public string ToStringOnSeparateLines()
-		{
-			return $"{X.ToString()}\n{Y.ToString()}\n{Z.ToString()}";
-		}
-	}
-
-	public struct CellEventInfo
-	{
-		public Cell Cell;
-		public GameObject Object;
-		public string ObjectType;
-	}
-
-	public interface ICell
-	{
-		List<string> NeighborNames { get; }
-		Dictionary<string, ICell> Neighbors { get; }
-		ICellCoordinates Coordinates { get; set; }
-		string Name { get; }
-		string CellUuid { get; }
-		IGrid Grid { get; set; }
-	}
-
 	public class Cell : MonoBehaviour, ICell
 	{
-		public class CellEvent : UnityEvent<CellEventInfo>
-		{
-		};
+		// List of neighboring cell game objects, these need to be set in the editor
+		[SerializeField] public List<Cell> neighborCellObjects = new List<Cell>();
+
+		protected ICellCoordinates _Coordinates;
+
+		protected IGrid _Grid;
+
+		protected Dictionary<string, ICell> _neighbors;
+
+		// List of neighboring cell game objects, these need to be set in the editor
+		// [SerializeField] public List<CellBorderPoint> borderPointObjects;
+
+		public Dictionary<string, CellBorderPoint> BorderPoints = new Dictionary<string, CellBorderPoint>();
+
+		// For debug visualisation
+		protected Canvas CellCanvas;
+		protected Text CellLabel;
+
+		public CellEvent OnCloseToBorder;
 
 		public CellEvent OnEntered;
 		public CellEvent OnExist;
-
-		public CellEvent OnCloseToBorder;
 		public CellEvent OnNotCloseToBorder;
+
+
+		protected virtual void Awake()
+		{
+			SetupCell();
+			Coordinates = new CellCoordinates(transform.position);
+		}
+
+		protected virtual void Start()
+		{
+			foreach (var cell in neighborCellObjects) _neighbors[cell.CellUuid] = cell;
+
+			if (CellCanvas != null) CellLabel.text = ((CellCoordinates) Coordinates).ToStringOnSeparateLines();
+
+			foreach (var trigger in GetComponentsInChildren<CellTrigger>())
+			{
+				trigger.OnTriggerEntered.AddListener(CellTriggerEntered);
+				trigger.OnTriggerExited.AddListener(CellTriggerExited);
+			}
+		}
 
 		public string CellUuid => GetCellUuid(this);
 
-		public string Name => this.name;
+		public string Name => name;
 
-		protected IGrid _Grid;
 		public IGrid Grid
 		{
 			get => _Grid;
 			set => _Grid = value;
 		}
 
-		protected ICellCoordinates _Coordinates;
 		public ICellCoordinates Coordinates
 		{
 			get => _Coordinates;
 			set => _Coordinates = value;
 		}
 
-		// For debug visualisation
-		protected Canvas CellCanvas;
-		protected Text CellLabel;
-
-		protected Dictionary<string, ICell> _neighbors;
 		public Dictionary<string, ICell> Neighbors => _neighbors;
 
 		public List<string> NeighborNames
 		{
 			get { return Neighbors.Values.ToList().Select(n => n.Name).ToList(); }
 		}
-
-		// List of neighboring cell game objects, these need to be set in the editor
-		[SerializeField] public List<Cell> neighborCellObjects = new List<Cell>();
-
-		// List of neighboring cell game objects, these need to be set in the editor
-		// [SerializeField] public List<CellBorderPoint> borderPointObjects;
-
-		public Dictionary<string, CellBorderPoint> BorderPoints = new Dictionary<string, CellBorderPoint>();
 
 		protected void SetupCell()
 		{
@@ -131,36 +92,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 			CellLabel = GetComponentInChildren<Text>();
 		}
 
-
-		protected virtual void Awake()
-		{
-			SetupCell();
-			Coordinates = new CellCoordinates(transform.position);
-		}
-
-		protected virtual void Start()
-		{
-			foreach (Cell cell in neighborCellObjects)
-			{
-				_neighbors[cell.CellUuid] = cell;
-			}
-
-			if (CellCanvas != null)
-			{
-				CellLabel.text = ((CellCoordinates) Coordinates).ToStringOnSeparateLines();
-			}
-
-			foreach (var trigger in GetComponentsInChildren<CellTrigger>())
-			{
-				trigger.OnTriggerEntered.AddListener(CellTriggerEntered);
-				trigger.OnTriggerExited.AddListener(CellTriggerExited);
-			}
-		}
-
 		// Handle cell trigger entered events, if a new object has entered, invokes OnCellEntered event
 		protected virtual void CellTriggerEntered(CellTriggerInfo triggerInfo)
 		{
-			CellEventInfo cellEventInfo = new CellEventInfo
+			var cellEventInfo = new CellEventInfo
 			{
 				Cell = this,
 				Object = triggerInfo.TriggeredObject
@@ -199,7 +134,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 			return new Guid(Animator.StringToHash(cellName),
 				(short) Animator.StringToHash(coords.ToString()),
 				(short) Animator.StringToHash(SceneManager.GetActiveScene().name),
-				new byte[]
+				new[]
 				{
 					(byte) coords.X,
 					(byte) coords.Y,
@@ -210,6 +145,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 					(byte) (coords.X + coords.X),
 					(byte) (coords.Z + coords.Z)
 				}).ToString("N");
+		}
+
+		public class CellEvent : UnityEvent<CellEventInfo>
+		{
 		}
 	}
 }

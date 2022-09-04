@@ -3,26 +3,26 @@ using UnityEngine;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-    public class DataCollectionController : MonoBehaviour
-    {
-        public LogCollector logCollector;
-        public bool Collect = false;
+	public class DataCollectionController : MonoBehaviour
+	{
+		public LogCollector logCollector;
+		public bool Collect;
 
-        void Awake()
-        {
-            logCollector = GetComponent<LogCollector>();
-        }
+		private void Awake()
+		{
+			logCollector = GetComponent<LogCollector>();
+		}
 
-        // Start is called before the first frame update
-        void Start()
-        {
-            if(Collect)
-                logCollector.StartCollection();
-        }
+		// Start is called before the first frame update
+		private void Start()
+		{
+			if (Collect)
+				logCollector.StartCollection();
+		}
 
-        // Update is called once per frame
-        void Update()
-        {
-        }
-    }
+		// Update is called once per frame
+		private void Update()
+		{
+		}
+	}
 }

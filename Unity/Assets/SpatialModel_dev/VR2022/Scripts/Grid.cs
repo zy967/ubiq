@@ -3,40 +3,24 @@ using UnityEngine;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-	public interface IGrid
-	{
-		ICell PlayerCell { get; set; }
-		Dictionary<string, ICell> Cells { get; }
-	}
-
 	public class Grid : MonoBehaviour, IGrid
 	{
-		public Cell.CellEvent OnPlayerCellChanged;
+		public List<string> activeCells = new List<string>();
 
-		public Cell.CellEvent OnObjectEnteredCell;
-		public Cell.CellEvent OnObjectLeftCell;
+		protected ICell _playerCell;
+
+		protected Dictionary<string, ICell> CellDictionary;
 
 		public Cell.CellEvent OnEnteredCellBorder;
 		public Cell.CellEvent OnLeftCellBorder;
 
-		public List<string> activeCells = new List<string>();
+		public Cell.CellEvent OnObjectEnteredCell;
+		public Cell.CellEvent OnObjectLeftCell;
+
+		public Cell.CellEvent OnPlayerCellChanged;
 		// protected Dictionary<string, int> objectsInCellCounts = new Dictionary<string, int>();
 
 		protected string PlayerCellName; // For inspector view debugging
-
-		protected ICell _playerCell;
-		public ICell PlayerCell
-		{
-			get => _playerCell;
-			set
-			{
-				 _playerCell = value;
-				 PlayerCellName = _playerCell.Name;
-			}
-		}
-
-		protected Dictionary<string, ICell> CellDictionary;
-		public Dictionary<string, ICell> Cells => CellDictionary;
 
 		protected virtual void Awake()
 		{
@@ -55,13 +39,25 @@ namespace SpatialModel_dev.VR2022.Scripts
 		{
 			foreach (var item in GetComponentsInChildren<ICell>())
 			{
-				 CellDictionary[item.CellUuid] = item;
-				 ((Cell) item).OnEntered.AddListener(OnCellEntered);
-				 ((Cell) item).OnExist.AddListener(OnLeftCell);
-				 ((Cell) item).OnCloseToBorder.AddListener(OnBorder);
-				 ((Cell) item).OnNotCloseToBorder.AddListener(OnNotBorder);
+				CellDictionary[item.CellUuid] = item;
+				((Cell) item).OnEntered.AddListener(OnCellEntered);
+				((Cell) item).OnExist.AddListener(OnLeftCell);
+				((Cell) item).OnCloseToBorder.AddListener(OnBorder);
+				((Cell) item).OnNotCloseToBorder.AddListener(OnNotBorder);
 			}
 		}
+
+		public ICell PlayerCell
+		{
+			get => _playerCell;
+			set
+			{
+				_playerCell = value;
+				PlayerCellName = _playerCell.Name;
+			}
+		}
+
+		public Dictionary<string, ICell> Cells => CellDictionary;
 
 		protected virtual void OnCellEntered(CellEventInfo info)
 		{
@@ -69,29 +65,20 @@ namespace SpatialModel_dev.VR2022.Scripts
 
 			if (info.ObjectType != "Player")
 			{
-				 OnObjectEnteredCell.Invoke(info);
-				 return;
+				OnObjectEnteredCell.Invoke(info);
+				return;
 			}
 
-			if (PlayerCell != null && info.Cell.CellUuid == PlayerCell.CellUuid)
-			{
-				 return;
-			}
+			if (PlayerCell != null && info.Cell.CellUuid == PlayerCell.CellUuid) return;
 
 			PlayerCell = info.Cell;
-			if (OnPlayerCellChanged != null)
-			{
-				 OnPlayerCellChanged.Invoke(info);
-			}
+			if (OnPlayerCellChanged != null) OnPlayerCellChanged.Invoke(info);
 		}
 
 		protected virtual void OnLeftCell(CellEventInfo info)
 		{
 			// Debug.Log("Cell: OnExist: " + info.cell.gameObject.name);
-			if (info.Object != null)
-			{
-				 OnObjectLeftCell.Invoke(info);
-			}
+			if (info.Object != null) OnObjectLeftCell.Invoke(info);
 		}
 
 		protected virtual void OnBorder(CellEventInfo info)

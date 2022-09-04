@@ -3,20 +3,11 @@ using UnityEngine.Events;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {
-	public struct CellTriggerInfo
-	{
-		public CellTrigger Trigger;
-		public GameObject TriggeredObject;
-	}
-
 	[RequireComponent(typeof(Collider))]
 	public class CellTrigger : MonoBehaviour
 	{
-		public class CellTriggerEvent : UnityEvent<CellTriggerInfo>
-		{
-		};
-
 		public CellTriggerEvent OnTriggerEntered;
+
 		public CellTriggerEvent OnTriggerExited;
 		// public Vector3[] borderPoints;
 
@@ -30,11 +21,8 @@ namespace SpatialModel_dev.VR2022.Scripts
 
 			// GetComponent<Collider>().enabled = false;
 
-			MeshRenderer meshRenderer = GetComponent<MeshRenderer>();
-			if (meshRenderer != null)
-			{
-				Destroy(meshRenderer);
-			}
+			var meshRenderer = GetComponent<MeshRenderer>();
+			if (meshRenderer != null) Destroy(meshRenderer);
 		}
 
 		private void OnTriggerEnter(Collider other)
@@ -54,6 +42,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 				Trigger = this,
 				TriggeredObject = other.gameObject
 			});
+		}
+
+		public class CellTriggerEvent : UnityEvent<CellTriggerInfo>
+		{
 		}
 	}
 }

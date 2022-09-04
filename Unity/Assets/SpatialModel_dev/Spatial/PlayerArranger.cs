@@ -5,8 +5,8 @@ namespace SpatialModel_dev.Spatial
 {
 	public class PlayerArranger : MonoBehaviour
 	{
-		private List<GameObject> players;
 		private Color areaColor;
+		private List<GameObject> players;
 
 		private void Awake()
 		{
@@ -18,14 +18,10 @@ namespace SpatialModel_dev.Spatial
 		{
 			if (players.Count < 0) return;
 
-			for (int i = 0; i < players.Count - 1; i++)
-			{
-				for (int j = i+1; j < players.Count; j++)
-				{
-					Debug.DrawLine(players[i].transform.position, players[j].transform.position,
-						areaColor);
-				}
-			}
+			for (var i = 0; i < players.Count - 1; i++)
+			for (var j = i + 1; j < players.Count; j++)
+				Debug.DrawLine(players[i].transform.position, players[j].transform.position,
+					areaColor);
 		}
 
 		private void OnTriggerEnter(Collider other)

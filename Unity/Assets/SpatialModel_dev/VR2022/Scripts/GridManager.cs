@@ -8,41 +8,35 @@ namespace SpatialModel_dev.VR2022.Scripts
 {
 	public class GridManager : MonoBehaviour
 	{
-		public Dictionary<string, RoomClient> availableRooms = new Dictionary<string, RoomClient>();
 		public Grid grid;
 		public NetworkScene networkScene;
 		public RoomClient client;
+		public float RoomRefreshRate = 50.0f;
+		public Dictionary<string, RoomClient> availableRooms = new Dictionary<string, RoomClient>();
+
+		private bool joinRoom;
 
 		private float timeRoomsLastDiscovered;
-		public float RoomRefreshRate = 50.0f;
 
-		bool joinRoom = false;
-
-		void Awake()
+		private void Awake()
 		{
 			if (networkScene == null)
 			{
-				NetworkScene n = FindObjectOfType<NetworkScene>();
-				if (n != null)
-				{
-					networkScene = n;
-				}
+				var n = FindObjectOfType<NetworkScene>();
+				if (n != null) networkScene = n;
 			}
 
 			if (grid == null)
 			{
-				Grid g = FindObjectOfType<Grid>();
-				if (g != null)
-				{
-					grid = g;
-				}
+				var g = FindObjectOfType<Grid>();
+				if (g != null) grid = g;
 			}
 
 			client = networkScene.GetComponentInChildren<RoomClient>();
 		}
 
 		// Start is called before the first frame update
-		void Start()
+		private void Start()
 		{
 			client.OnJoinedRoom.AddListener(OnJoinedRoom);
 			client.OnJoinedRoom.AddListener(OnRoomCreated);
@@ -53,20 +47,17 @@ namespace SpatialModel_dev.VR2022.Scripts
 			grid.OnLeftCellBorder.AddListener(OnLeftCellBorder);
 		}
 
-		void OnObjectLeftCell(CellEventInfo info)
+		private void OnObjectLeftCell(CellEventInfo info)
 		{
-			RoomObject roomObject =
+			var roomObject =
 				info.Object.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
 					.FirstOrDefault() as RoomObject;
-			if (roomObject != null)
-			{
-				roomObject.OnObjectLeftCell(info.Cell);
-			}
+			if (roomObject != null) roomObject.OnObjectLeftCell(info.Cell);
 		}
 
-		void OnObjectChangedCell(CellEventInfo info)
+		private void OnObjectChangedCell(CellEventInfo info)
 		{
-			RoomObject roomObject =
+			var roomObject =
 				info.Object.GetComponentsInChildren<MonoBehaviour>().Where(mb => mb is RoomObject)
 					.FirstOrDefault() as RoomObject;
 			if (roomObject != null)
@@ -79,13 +70,13 @@ namespace SpatialModel_dev.VR2022.Scripts
 				{
 					// Server will create a new room with the cell name
 					// TODO: not actually working
-					RoomClient newRoom = new RoomClient();
+					var newRoom = new RoomClient();
 					roomObject.UpdateRoom(newRoom);
 				}
 			}
 		}
 
-		void OnPlayerCellChanged(CellEventInfo info)
+		private void OnPlayerCellChanged(CellEventInfo info)
 		{
 			if (availableRooms.Count == 0 || !availableRooms.ContainsKey(info.Cell.CellUuid))
 			{
@@ -100,7 +91,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 			}
 		}
 
-		void OnCellBorder(CellEventInfo info)
+		private void OnCellBorder(CellEventInfo info)
 		{
 			if (info.Object.name == "Player" || info.Object.tag == "Player")
 			{
@@ -113,7 +104,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 			}
 		}
 
-		void OnLeftCellBorder(CellEventInfo info)
+		private void OnLeftCellBorder(CellEventInfo info)
 		{
 			if (info.Object.name == "Player" || info.Object.tag == "Player")
 			{
@@ -126,10 +117,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 			}
 		}
 
-		void OnRoomsAvailable(List<IRoom> rooms)
+		private void OnRoomsAvailable(List<IRoom> rooms)
 		{
 			// Debug.Log("GridManager: OnRoomsAvailable");
-			bool roomFound = false;
+			var roomFound = false;
 			availableRooms.Clear();
 			foreach (var room in rooms)
 			{
@@ -147,10 +138,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 				availableRooms[grid.PlayerCell.CellUuid] = new RoomClient();
 			}
 
-			if (grid.PlayerCell != null && !joinRoom)
-			{
-				UpdateObservedRooms();
-			}
+			if (grid.PlayerCell != null && !joinRoom) UpdateObservedRooms();
 
 			joinRoom = false;
 		}
@@ -170,19 +158,17 @@ namespace SpatialModel_dev.VR2022.Scripts
 			// Join the new room, leaves the current room in the process
 			// If I'm already observing to the new room, also stops observing it
 			client.Join(room.Room.JoinCode);
-
-			return;
 		}
 
 		public void CreateRoom(string name, string uuid)
 		{
 		}
 
-		void OnJoinedRoom(IRoom room)
+		private void OnJoinedRoom(IRoom room)
 		{
 		}
 
-		void OnRoomCreated(IRoom room)
+		private void OnRoomCreated(IRoom room)
 		{
 			JoinRoom((RoomClient) room);
 		}
