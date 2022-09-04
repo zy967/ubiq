@@ -1,10 +1,10 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Linq;
 
-namespace SpatialModel
+namespace SpatialModel_dev.VR2022.Scripts
 {
 	public struct CellBorderEventInfo
 	{

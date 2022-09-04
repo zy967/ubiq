@@ -7,38 +7,40 @@ using Ubiq.Spawning;
 using Ubiq.XR;
 using UnityEngine;
 
-
-public interface IBall
+namespace SpatialModel_dev.VR2022.Scripts
 {
-    void Attach(Hand hand);
-}
-public class BallSpawner : MonoBehaviour, IUseable
-{
-    public GameObject BallPrefab;
-
-    private Hand follow;
-    private Rigidbody body;
-
-    private void Awake()
+    public interface IBall
     {
-        body = GetComponent<Rigidbody>();
+        void Attach(Hand hand);
     }
-
-    public void UnUse(Hand controller)
+    public class BallSpawner : MonoBehaviour, IUseable
     {
-    }
+        public GameObject BallPrefab;
 
-    public void Use(Hand controller)
-    {
-        Debug.Log("BallSpawner: Use");
+        private Hand follow;
+        private Rigidbody body;
 
-        // TODO: Not working code
-        Debug.LogError("Ball Spawner not working");
+        private void Awake()
+        {
+            body = GetComponent<Rigidbody>();
+        }
 
-        // var ball = NetworkSpawner.SpawnPersistent(this, BallPrefab).GetComponents<MonoBehaviour>().Where(mb => mb is IBall).FirstOrDefault() as IBall;
-        // if (ball != null)
-        // {
-        //     ball.Attach(controller);
-        // }
+        public void UnUse(Hand controller)
+        {
+        }
+
+        public void Use(Hand controller)
+        {
+            Debug.Log("BallSpawner: Use");
+
+            // TODO: Not working code
+            Debug.LogError("Ball Spawner not working");
+
+            // var ball = NetworkSpawner.SpawnPersistent(this, BallPrefab).GetComponents<MonoBehaviour>().Where(mb => mb is IBall).FirstOrDefault() as IBall;
+            // if (ball != null)
+            // {
+            //     ball.Attach(controller);
+            // }
+        }
     }
 }

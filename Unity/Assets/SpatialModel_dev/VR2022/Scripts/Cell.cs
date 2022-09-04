@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-using System.Linq;
-using System;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-namespace SpatialModel
+namespace SpatialModel_dev.VR2022.Scripts
 {
 	public interface ICellCoordinates
 	{
@@ -191,20 +191,7 @@ namespace SpatialModel
 
 		public static string GetCellUuid(ICell cell)
 		{
-			return new Guid(Animator.StringToHash(cell.Name),
-				(short) Animator.StringToHash(cell.Coordinates.ToString()),
-				(short) Animator.StringToHash(SceneManager.GetActiveScene().name),
-				new byte[]
-				{
-					(byte) cell.Coordinates.X,
-					(byte) cell.Coordinates.Y,
-					(byte) cell.Coordinates.Z,
-					(byte) (cell.Coordinates.X + cell.Coordinates.Y),
-					(byte) (cell.Coordinates.X + cell.Coordinates.Z),
-					(byte) (cell.Coordinates.Y + cell.Coordinates.Z),
-					(byte) (cell.Coordinates.X + cell.Coordinates.X),
-					(byte) (cell.Coordinates.Z + cell.Coordinates.Z)
-				}).ToString("N");
+			return GetCellUuid(cell.Name, cell.Coordinates);
 		}
 
 		public static string GetCellUuid(string cellName, ICellCoordinates coords)

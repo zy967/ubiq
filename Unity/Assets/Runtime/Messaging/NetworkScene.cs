@@ -104,6 +104,11 @@ namespace Ubiq.Messaging
             }
         }
 
+        public List<Action<ReferenceCountedSceneGraphMessage>> GetProcessor(NetworkId id)
+        {
+            return processorCollections?[id];
+        }
+
         public static NetworkScene FindNetworkScene(MonoBehaviour component)
         {
             return FindNetworkScene(component.transform);

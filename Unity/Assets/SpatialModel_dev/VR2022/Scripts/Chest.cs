@@ -1,41 +1,41 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using Ubiq.XR;
 using UnityEngine;
-using Ubiq.Messaging;
-using Ubiq.XR;
 
-public class Chest : MonoBehaviour, IUseable
+namespace SpatialModel_dev.VR2022.Scripts
 {
-
-    Animator animator;
-
-    bool open = false;
-
-    void Awake()
+    public class Chest : MonoBehaviour, IUseable
     {
-        animator = GetComponent<Animator>();
-    }
 
-    // Start is called before the first frame update
-    void Start()
-    {
+        Animator animator;
+
+        bool open = false;
+
+        void Awake()
+        {
+            animator = GetComponent<Animator>();
+        }
+
+        // Start is called before the first frame update
+        void Start()
+        {
         
-    }
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
+        // Update is called once per frame
+        void Update()
+        {
         
-    }
+        }
 
-    public void Use(Hand controller)
-    {
-        open = !open;
-        animator.SetBool("OpenChest", open);
-    }
+        public void Use(Hand controller)
+        {
+            open = !open;
+            animator.SetBool("OpenChest", open);
+        }
 
-    public void UnUse(Hand controller)
-    {
+        public void UnUse(Hand controller)
+        {
         
+        }
     }
 }

@@ -1,8 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel
+namespace SpatialModel_dev.Spatial.Scripts
 {
 	public class Nimbus : MonoBehaviour
 	{

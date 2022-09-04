@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using SpatialModel;
+using SpatialModel_dev.Spatial;
 using Ubiq.Avatars;
 using Ubiq.Extensions;
 using Ubiq.Messaging;
@@ -12,6 +12,7 @@ using Ubiq.Samples.Bots.Messaging;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.Events;
+using Message = Ubiq.Samples.Bots.Messaging.Message;
 
 namespace Ubiq.Samples.Bots
 {

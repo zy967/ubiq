@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel
+namespace SpatialModel_dev.VR2022.Scripts
 {
 	[System.Serializable]
 	public struct HexCoordinates : ICellCoordinates

@@ -1,7 +1,6 @@
-using Ubiq.Rooms;
 using UnityEngine;
 
-namespace SpatialModel
+namespace SpatialModel_dev.Spatial.Scripts
 {
 	public class Aura : MonoBehaviour
 	{

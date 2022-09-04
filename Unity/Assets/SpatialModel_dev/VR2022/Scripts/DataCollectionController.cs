@@ -1,27 +1,28 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using Ubiq.Logging;
+﻿using Ubiq.Logging;
 using UnityEngine;
 
-public class DataCollectionController : MonoBehaviour
+namespace SpatialModel_dev.VR2022.Scripts
 {
-    public LogCollector logCollector;
-    public bool Collect = false;
-
-    void Awake()
+    public class DataCollectionController : MonoBehaviour
     {
-        logCollector = GetComponent<LogCollector>();
-    }
+        public LogCollector logCollector;
+        public bool Collect = false;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        if(Collect)
-            logCollector.StartCollection();
-    }
+        void Awake()
+        {
+            logCollector = GetComponent<LogCollector>();
+        }
 
-    // Update is called once per frame
-    void Update()
-    {
+        // Start is called before the first frame update
+        void Start()
+        {
+            if(Collect)
+                logCollector.StartCollection();
+        }
+
+        // Update is called once per frame
+        void Update()
+        {
+        }
     }
 }

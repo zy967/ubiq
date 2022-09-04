@@ -4,7 +4,7 @@ using Ubiq.Messaging;
 using Ubiq.Rooms;
 using UnityEngine;
 
-namespace SpatialModel
+namespace SpatialModel_dev.VR2022.Scripts
 {
 	public class GridManager : MonoBehaviour
 	{
