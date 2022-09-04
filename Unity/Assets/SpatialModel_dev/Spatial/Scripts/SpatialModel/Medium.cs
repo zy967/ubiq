@@ -53,12 +53,6 @@ namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
 			// UpdateByFocus();
 		}
 
-		private void UpdateByNimbus()
-		{
-			// Update sending message status
-			foreach (var networkScene in networkScenes) networkScene.isSendingMessage = nimbus.IsSpreading();
-		}
-
 		private void UpdateByFocus()
 		{
 			foreach (var subRoomClient in subRoomClients)

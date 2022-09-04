@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using SpatialModel_dev.Spatial.Scripts.Grid;
-using Ubiq.Guids;
 using Ubiq.Messaging;
 using UnityEngine;
 
@@ -13,8 +12,7 @@ namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
 
 	public class AuraManagerClient : MonoBehaviour
 	{
-		private readonly NetworkId auraServerObjectId =
-			new NetworkId(Guids.Generate(new Guid("AuraManager"), "a").ToString());
+		private readonly NetworkId auraServerObjectId = new NetworkId(3993);
 
 		private CellDetector cellDetector;
 		private NetworkId clientId;

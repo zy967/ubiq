@@ -33,7 +33,6 @@ namespace SpatialModel_dev.Spatial.Scripts.Grid
 		public CellEvent OnExist;
 		public CellEvent OnNotCloseToBorder;
 
-
 		protected virtual void Awake()
 		{
 			SetupCell();
