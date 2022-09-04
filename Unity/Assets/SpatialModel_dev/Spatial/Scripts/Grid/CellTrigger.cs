@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	[RequireComponent(typeof(Collider))]
 	public class CellTrigger : MonoBehaviour

@@ -1,4 +1,5 @@
 ﻿using System;
+using SpatialModel_dev.Spatial.Scripts.Grid;
 using Ubiq.Dictionaries;
 using Ubiq.Messaging;
 using Ubiq.Rooms;
@@ -32,6 +33,10 @@ namespace SpatialModel_dev.VR2022.Scripts
 		public bool inEmptyRoom;
 
 		public float timeToDestroyObject = 10;
+
+		private readonly NetworkId RoomServerObjectId = new NetworkId(1);
+
+		private readonly bool stopDestoryLocalObject = false;
 		private bool destroyMethodInvoked;
 
 		protected MeshRenderer meshRenderer;
@@ -44,11 +49,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 		private Vector3 previousPosition;
 		private ushort RoomServerComponentId = 1;
 
-		private readonly NetworkId RoomServerObjectId = new NetworkId(1);
-
 		private RoomClient RoomToAssign;
-
-		private readonly bool stopDestoryLocalObject = false;
 		protected float timeRemaining;
 
 		public string roomDictionaryKey

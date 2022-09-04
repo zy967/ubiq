@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using SpatialModel_dev.Spatial.Scripts.Grid;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -15,12 +16,12 @@ namespace SpatialModel_dev.VR2022.Scripts
 		[HideInInspector] public float distanceToCell; //Only used in HexCell when creating Borders automatically
 
 		public float exitDelay;
-
-		public CellBorderEvent OnBorderTriggerEntered;
-		public CellBorderEvent OnBorderTriggerExited;
 		private readonly Dictionary<string, IEnumerator> removeCoroutines = new Dictionary<string, IEnumerator>();
 
 		private readonly Dictionary<string, GameObject> triggeredObjects = new Dictionary<string, GameObject>();
+
+		public CellBorderEvent OnBorderTriggerEntered;
+		public CellBorderEvent OnBorderTriggerExited;
 
 		private void Awake()
 		{

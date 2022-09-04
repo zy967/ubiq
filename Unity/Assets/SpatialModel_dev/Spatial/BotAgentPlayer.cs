@@ -3,12 +3,12 @@ using UnityEngine.AI;
 
 namespace SpatialModel_dev.Spatial
 {
-    /// <summary>
-    ///     Based on previous work in Sample.Bot.BotAgent
-    ///     The main controller for a Bot; this Component controls the behaviour of the bot, moving it around the scene
-    ///     and emulating interaction.
-    /// </summary>
-    [RequireComponent(typeof(NavMeshAgent))]
+	/// <summary>
+	///     Based on previous work in Sample.Bot.BotAgent
+	///     The main controller for a Bot; this Component controls the behaviour of the bot, moving it around the scene
+	///     and emulating interaction.
+	/// </summary>
+	[RequireComponent(typeof(NavMeshAgent))]
 	public class BotAgentPlayer : MonoBehaviour
 	{
 		public float Radius = 10f;

@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	[Serializable]
 	public struct CellCoordinates : ICellCoordinates

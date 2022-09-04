@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	public class Grid : MonoBehaviour, IGrid
 	{

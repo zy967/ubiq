@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using SpatialModel_dev.Spatial.Scripts.Grid;
 using Ubiq.Messaging;
 using Ubiq.Rooms;
 using UnityEngine;
+using Grid = SpatialModel_dev.Spatial.Scripts.Grid.Grid;
 
 namespace SpatialModel_dev.VR2022.Scripts
 {

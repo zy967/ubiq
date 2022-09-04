@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	public class Cell : MonoBehaviour, ICell
 	{
@@ -22,7 +22,6 @@ namespace SpatialModel_dev.VR2022.Scripts
 		// List of neighboring cell game objects, these need to be set in the editor
 		// [SerializeField] public List<CellBorderPoint> borderPointObjects;
 
-		public Dictionary<string, CellBorderPoint> BorderPoints = new Dictionary<string, CellBorderPoint>();
 
 		// For debug visualisation
 		protected Canvas CellCanvas;
@@ -112,16 +111,6 @@ namespace SpatialModel_dev.VR2022.Scripts
 		// Player leaving a cell does not cause an event to be invoked, player moving from one cell to another is handled only by OnCellEntered events
 		protected virtual void CellTriggerExited(CellTriggerInfo triggerInfo)
 		{
-		}
-
-		protected virtual void OnObjectDestroyed(RoomObjectInfo objectInfo)
-		{
-			// Debug.Log("HexCell: " + name + " OnObjectDestroyed: " + objectInfo.Name);
-			OnExist.Invoke(new CellEventInfo
-			{
-				Cell = this,
-				ObjectType = "RoomObject"
-			});
 		}
 
 		public static string GetCellUuid(ICell cell)

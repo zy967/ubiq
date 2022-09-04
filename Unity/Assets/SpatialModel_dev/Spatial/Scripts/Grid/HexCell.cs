@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	public class HexCell : Cell
 	{

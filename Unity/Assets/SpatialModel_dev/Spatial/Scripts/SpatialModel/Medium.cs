@@ -5,7 +5,7 @@ using Ubiq.Messaging;
 using Ubiq.Rooms;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
 {
 	public class Medium : MonoBehaviour
 	{

@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
 {
 	internal class CellDetector
 	{
+		private readonly LayerMask layerMask;
 		private Collider[] cellBuffer;
 		private int collectedColliderCount;
-		private readonly LayerMask layerMask;
 
 		public CellDetector()
 		{

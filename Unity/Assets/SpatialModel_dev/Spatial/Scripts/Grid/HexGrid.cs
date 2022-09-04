@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SpatialModel_dev.VR2022.Scripts
+namespace SpatialModel_dev.Spatial.Scripts.Grid
 {
 	public class HexGrid : Grid
 	{
@@ -48,7 +48,7 @@ namespace SpatialModel_dev.VR2022.Scripts
 			cell.transform.localPosition = new Vector3((x + z * 0.5f - (int) (z / 2.0f)) * (InnerRadius * 2f), 0f,
 				z * (outerRadius * 1.5f));
 			cell.Coordinates = HexCoordinates.FromOffsetCoordinates(x, z);
-			cell.name = "Hex Cell " + ((HexCoordinates) cell.Coordinates);
+			cell.name = "Hex Cell " + (HexCoordinates) cell.Coordinates;
 			CellDictionary[Cell.GetCellUuid(cell)] = cell;
 
 			cell.OnEntered.AddListener(OnCellEntered);
