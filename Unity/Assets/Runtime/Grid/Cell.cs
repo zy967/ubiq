@@ -6,7 +6,7 @@ using UnityEngine.Events;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	public class Cell : MonoBehaviour, ICell
 	{

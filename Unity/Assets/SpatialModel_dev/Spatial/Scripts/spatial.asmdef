@@ -1,7 +1,0 @@
-﻿{
-  "name": "spatial",
-  "references": [
-    "Ubiq",
-    "Ubiq.Editor"
-  ]
-}

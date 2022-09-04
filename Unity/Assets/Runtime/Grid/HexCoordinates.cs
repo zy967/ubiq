@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	[Serializable]
 	public struct HexCoordinates : ICellCoordinates

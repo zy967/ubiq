@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	public struct CellEventInfo
 	{

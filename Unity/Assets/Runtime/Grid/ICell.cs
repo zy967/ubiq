@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	public interface ICell
 	{

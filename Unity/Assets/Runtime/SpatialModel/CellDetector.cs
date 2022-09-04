@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
+namespace Ubiq.SpatialModel
 {
 	internal class CellDetector
 	{

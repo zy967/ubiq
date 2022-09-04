@@ -1,6 +1,6 @@
 ﻿using System;
-using SpatialModel_dev.Spatial.Scripts.Grid;
 using Ubiq.Dictionaries;
+using Ubiq.Grid;
 using Ubiq.Messaging;
 using Ubiq.Rooms;
 using Ubiq.Spawning;

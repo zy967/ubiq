@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using SpatialModel_dev.Spatial.Scripts.Grid;
+using Ubiq.Grid;
 using Ubiq.Messaging;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
+namespace Ubiq.SpatialModel
 {
 	#region Network Arguments
 

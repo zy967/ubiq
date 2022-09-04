@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class HexMesh : MonoBehaviour

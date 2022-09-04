@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using SpatialModel_dev.Spatial.Scripts.Grid;
+using Ubiq.Grid;
 using UnityEngine;
 using UnityEngine.Events;
 

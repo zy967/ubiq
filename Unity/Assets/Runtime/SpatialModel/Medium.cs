@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using Ubiq.Guids;
 using Ubiq.Messaging;
 using Ubiq.Rooms;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
+namespace Ubiq.SpatialModel
 {
 	public class Medium : MonoBehaviour
 	{
@@ -41,7 +40,7 @@ namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
 			mediumName = gameObject.name;
 
 			// TODO: maybe we should include the aura's name (should also be unique)
-			mediumUUID = Guids.Generate(new Guid("ca761232-ed42-11ce-bacd-00aa0057b223"), mediumName).ToString();
+			mediumUUID = Guids.Guids.Generate(new Guid("ca761232-ed42-11ce-bacd-00aa0057b223"), mediumName).ToString();
 
 			foreach (var subRoomClient in subRoomClients)
 				subRoomClient.Join($"Observer Room {IdGenerator.GenerateUnique().ToString()}", true);

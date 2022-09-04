@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
+namespace Ubiq.SpatialModel
 {
 	public class Focus : MonoBehaviour
 	{

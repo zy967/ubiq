@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial.Scripts.Grid
+namespace Ubiq.Grid
 {
 	[Serializable]
 	public struct CellCoordinates : ICellCoordinates

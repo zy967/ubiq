@@ -1,7 +1,7 @@
 ﻿using System;
 using Ubiq.Messaging;
 
-namespace SpatialModel_dev.Spatial.Scripts.SpatialModel
+namespace Ubiq.SpatialModel
 {
 	[Serializable]
 	internal class MessagePassArgs
