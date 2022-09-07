@@ -35,5 +35,10 @@ namespace Ubiq.Grid
 		{
 			return $"{X.ToString()}\n{Y.ToString()}\n{Z.ToString()}";
 		}
+
+		public Vector3 AsVector3()
+		{
+			return new Vector3(X, Y, Z);
+		}
 	}
 }

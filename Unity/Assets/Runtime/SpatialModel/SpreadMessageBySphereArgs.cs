@@ -1,14 +1,16 @@
 ﻿using System;
 using Ubiq.Messaging;
+using UnityEngine;
 
 namespace Ubiq.SpatialModel
 {
 	[Serializable]
-	internal class MessagePassArgs
+	internal class SpreadMessageBySphereArgs
 	{
-		public string medium;
-		public string[] auraCellUuids;
 		public NetworkId senderId;
+		public Vector3 origin;
+		public float radius;
+		public string medium;
 		public string message;
 	}
 }

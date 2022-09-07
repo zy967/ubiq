@@ -8,7 +8,8 @@ namespace Ubiq.Grid
 
 		public int width = 6;
 		public int height = 6;
-		public bool showCells;
+		public bool showTexture;
+		public bool showLabel;
 		public bool expanding;
 		public HexCell cellPrefab;
 		public float InnerRadius => outerRadius * 0.866025404f;
@@ -56,7 +57,7 @@ namespace Ubiq.Grid
 			cell.OnCloseToBorder.AddListener(OnBorder);
 			cell.OnNotCloseToBorder.AddListener(OnNotBorder);
 
-			cell.SetVisible(showCells);
+			cell.SetVisible(showTexture, showLabel);
 			return cell;
 		}
 

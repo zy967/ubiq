@@ -4,14 +4,11 @@ namespace Ubiq.Grid
 {
 	public class HexCell : Cell
 	{
-		private HexMesh hexMesh;
 		private new HexGrid Grid => (HexGrid) base.Grid;
 
 		protected override void Awake()
 		{
 			SetupCell();
-
-			hexMesh = GetComponentInChildren<HexMesh>();
 			// cellCanvas = GetComponentInChildren<Canvas>();
 			if (base.Grid != null && !(base.Grid is HexGrid))
 			{
@@ -23,11 +20,13 @@ namespace Ubiq.Grid
 		// Start is called before the first frame update
 		protected override void Start()
 		{
+			// cellMeshesName = cellMeshes.Values.ToList();
+
 			// Debug.Log("Hex Cell Start: " + name + " uuid: " + CellUUID);
 
 			if (base.Grid is HexGrid)
 			{
-				hexMesh.Triangulate(this, Grid);
+				// hexMesh.Triangulate(this, Grid);
 				// Debug.Log("Hex Cell Start: " + name + " cell dictionary count: " + Grid.cellDictionary.Count);
 				foreach (var item in ((HexCoordinates) Coordinates).GetNeighborCoordinates())
 				{
@@ -53,6 +52,11 @@ namespace Ubiq.Grid
 					idx++;
 				}
 
+				foreach (var kvp in cellMeshes)
+				{
+					kvp.Value.transform.localScale = new Vector3(Grid.outerRadius * 2, Grid.outerRadius * 2, 1);
+				}
+
 				if (CellCanvas != null)
 				{
 					CellLabel.text = ((HexCoordinates) Coordinates).ToStringOnSeparateLines();
@@ -61,10 +65,9 @@ namespace Ubiq.Grid
 			}
 		}
 
-		public void SetVisible(bool visible)
+		public void FixedUpdate()
 		{
-			hexMesh.GetComponent<MeshRenderer>().enabled = visible;
-			CellCanvas.enabled = visible;
+			ResetShow();
 		}
 	}
 }

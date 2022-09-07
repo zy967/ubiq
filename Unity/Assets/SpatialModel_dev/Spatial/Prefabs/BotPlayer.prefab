@@ -466,7 +466,7 @@ MonoBehaviour:
   servers:
   - listen_on_ip: 
     listen_on_port: 
-    send_to_ip: 18.133.119.167
+    send_to_ip: localhost
     send_to_port: 8007
     type: 0
 --- !u!114 &7904454438628615305
@@ -481,7 +481,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fddd4936b870f084aa3cf82b0e18125f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isSendingMessage: 1
 --- !u!114 &216090969835191715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -540,8 +539,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkId:
-    a: 3654965853
-    b: 3034694391
+    a: 4121359175
+    b: 3990229239
   __serializedGoid: GlobalObjectId_V1-0-00000000000000000000000000000000-0-0
 --- !u!114 &1602017977552990765
 MonoBehaviour:

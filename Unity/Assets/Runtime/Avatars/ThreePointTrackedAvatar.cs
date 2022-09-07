@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using Ubiq.Messaging;
+using Ubiq.SpatialModel;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -22,6 +22,7 @@ namespace Ubiq.Avatars
 		private State[] state = new State[1];
 		private Avatar avatar;
 		private float lastTransmitTime;
+		private AuraManagerClient auraManagerClient;
 
 		[Serializable]
 		private struct State
@@ -40,6 +41,7 @@ namespace Ubiq.Avatars
 		{
 			lastTransmitTime = Time.time;
 			networkSceneRoot = networkScene.transform;
+			auraManagerClient = networkSceneRoot.GetComponentInChildren<AuraManagerClient>();
 		}
 
 		private void Update()
@@ -99,20 +101,37 @@ namespace Ubiq.Avatars
 		{
 			// Co-ords from hints are already in local to our network scene
 			// so we can send them without any changes
-			var transformBytes = MemoryMarshal.AsBytes(new ReadOnlySpan<State>(state));
+			// var transformBytes = MemoryMarshal.AsBytes(new ReadOnlySpan<State>(state));
+			//
+			// var message = ReferenceCountedSceneGraphMessage.Rent(transformBytes.Length);
+			// transformBytes.CopyTo(new Span<byte>(message.bytes, message.start, message.length));
+			//
+			// var a = message.ToString();
+			// var aa = transformBytes.ToString();
+			// var aaa = JsonUtility.ToJson(message);
+			//
+			// Debug.Log(a);
+			// Debug.Log(aa);
+			// Debug.Log(aaa);
 
-			var message = ReferenceCountedSceneGraphMessage.Rent(transformBytes.Length);
-			transformBytes.CopyTo(new Span<byte>(message.bytes, message.start, message.length));
-
-			networkScene.Send(networkId, message);
+			Vector3 currentCell =
+				auraManagerClient.GetCellsBySphere(state[0].head.position, 2.0f)?[0].Coordinates.AsVector3() ??
+				Vector3.one;
+			// auraManagerClient.Send(networkId, "transform",
+			// 	auraManagerClient.TryGetCellsBySphere(state[0].head.position, 3.0f), message.ToString());
+			auraManagerClient.SendBySphere(networkId,
+				"transform",
+				currentCell,
+				2,
+				JsonUtility.ToJson(state[0]));
 		}
 
 		protected override void ProcessMessage(ReferenceCountedSceneGraphMessage message)
 		{
-			MemoryMarshal.Cast<byte, State>(
-					new ReadOnlySpan<byte>(message.bytes, message.start, message.length))
-				.CopyTo(new Span<State>(state));
-
+			// MemoryMarshal.Cast<byte, State>(new ReadOnlySpan<byte>(message.bytes, message.start, message.length))
+			// 	.CopyTo(new Span<State>(state));
+			state[0] = JsonUtility.FromJson<State>(message.ToString());
+			// state[0] = message.FromJson<State>();
 			OnRecv();
 		}
 

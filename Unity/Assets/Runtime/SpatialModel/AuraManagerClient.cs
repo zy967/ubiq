@@ -34,7 +34,7 @@ namespace Ubiq.SpatialModel
 			scene.AddProcessor(clientId, ProcessMessage);
 		}
 
-		public void AddFocus(string auraCellUuid, string medium)
+		public void AddSingleFocus(string auraCellUuid, string medium)
 		{
 			Dictionary<string, int> focusedMediumsOfCell;
 			if (focusedCells.TryGetValue(auraCellUuid, out focusedMediumsOfCell))
@@ -60,14 +60,14 @@ namespace Ubiq.SpatialModel
 				focusedCells.Add(auraCellUuid, focusedMediumsOfCell);
 			}
 
-			SendToServer("AddFocus", new FocusArgs
+			SendToServer("AddFocus", new SingleFocusArgs
 			{
 				auraCellUuid = auraCellUuid,
 				medium = medium
 			});
 		}
 
-		public void RemoveFocus(string auraCellUuid, string medium)
+		public void RemoveSingleFocus(string auraCellUuid, string medium)
 		{
 			Dictionary<string, int> focusedMediumsOfCell;
 			if (focusedCells.TryGetValue(auraCellUuid, out focusedMediumsOfCell))
@@ -79,7 +79,7 @@ namespace Ubiq.SpatialModel
 					focusedMediumsOfCell[medium] = focusedCount;
 
 					if (focusedCount == 0)
-						SendToServer("RemoveFocus", new FocusArgs
+						SendToServer("RemoveFocus", new SingleFocusArgs
 						{
 							auraCellUuid = auraCellUuid,
 							medium = medium
@@ -88,21 +88,38 @@ namespace Ubiq.SpatialModel
 			}
 		}
 
-		public List<string> GetCellsBySphere(Vector3 center, float radius)
+
+		public void AddSphereFocus(NetworkId senderId, string medium, Vector3 origin, float radius)
 		{
-			return cellDetector.GetCellsBySphere(center, radius)
-				.ConvertAll(c => c.GetComponentInParent<Cell>().CellUuid);
+			SendToServer("AddSphereFocus", new SphereFocusArgs()
+			{
+				senderId = senderId,
+				medium = medium,
+				origin = origin,
+				radius = radius
+			});
 		}
 
-		public void Send(NetworkId senderId, string medium, List<string> auraCellUuids, string message)
+		public List<Cell> GetCellsBySphere(Vector3 center, float radius)
 		{
-			SendToServer("MessagePass", new MessagePassArgs
+			return cellDetector.TryGetCellsBySphere<Cell>(center, radius);
+		}
+
+		public void SendBySphere(NetworkId senderId, string medium, Vector3 center, float radius,
+			string message)
+		{
+			var args = new SpreadMessageBySphereArgs
 			{
-				medium = medium,
-				auraCellUuids = auraCellUuids.ToArray(),
 				senderId = senderId,
+				origin = center,
+				radius = radius,
+				medium = medium,
 				message = message
-			});
+			};
+
+			var okay = JsonUtility.ToJson(args);
+			Debug.Log(okay);
+			SendToServer("SpreadMessage", args);
 		}
 
 		private void SendToServer(string type, object argument)
@@ -115,9 +132,9 @@ namespace Ubiq.SpatialModel
 			var container = JsonUtility.FromJson<Message>(auraMessage.ToString());
 			switch (container.type)
 			{
-				case "MessagePass":
+				case "SpreadMessage":
 				{
-					var args = JsonUtility.FromJson<MessagePassArgs>(container.args);
+					var args = JsonUtility.FromJson<SpreadMessageBySphereArgs>(container.args);
 					var processors = scene.GetProcessor(args.senderId);
 					foreach (var processor in processors)
 					{

@@ -26,6 +26,10 @@ namespace Ubiq.Grid
 		// For debug visualisation
 		protected Canvas CellCanvas;
 		protected Text CellLabel;
+		protected Dictionary<string, HexMesh> cellMeshes = new Dictionary<string, HexMesh>();
+
+
+		// [SerializeField] public List<HexMesh> cellMeshesName = new List<HexMesh>();
 
 		public CellEvent OnCloseToBorder;
 
@@ -88,6 +92,7 @@ namespace Ubiq.Grid
 
 			CellCanvas = GetComponentInChildren<Canvas>();
 			CellLabel = GetComponentInChildren<Text>();
+			foreach (var hexMesh in GetComponentsInChildren<HexMesh>()) cellMeshes.Add(hexMesh.name, hexMesh);
 		}
 
 		// Handle cell trigger entered events, if a new object has entered, invokes OnCellEntered event
@@ -137,6 +142,28 @@ namespace Ubiq.Grid
 
 		public class CellEvent : UnityEvent<CellEventInfo>
 		{
+		}
+
+		public void SetVisible(bool showTexture, bool showLabel)
+		{
+			cellMeshes["Border Mesh"].SetVisible(showTexture);
+			CellCanvas.enabled = showLabel;
+		}
+
+		public void ShowFocus(bool isShow, float duration = 0.1f)
+		{
+			cellMeshes["Focus Mesh"].SetVisible(isShow);
+		}
+
+		public void ShowNimbus(bool isShow, float duration = 0.1f)
+		{
+			cellMeshes["Nimbus Mesh"].SetVisible(isShow);
+		}
+
+		public void ResetShow()
+		{
+			cellMeshes["Focus Mesh"].SetVisible(false);
+			cellMeshes["Nimbus Mesh"].SetVisible(false);
 		}
 	}
 }

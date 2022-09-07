@@ -59,5 +59,10 @@ namespace Ubiq.Grid
 
 			return neighborCoord;
 		}
+
+		public Vector3 AsVector3()
+		{
+			return new Vector3(X, Y, Z);
+		}
 	}
 }

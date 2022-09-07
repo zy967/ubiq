@@ -1,7 +1,7 @@
 const { Message, NetworkId, Schema, SerialisedDictionary, Uuid } = require("./ubiq");
 const { EventEmitter } = require('events');
 const { args } = require("commander");
-
+const {AuraManager} = require("./auramanager");
 const VERSION_STRING = "0.0.4";
 const RoomServerReservedId = 1;
 
@@ -618,6 +618,7 @@ class Room{
         this.peers = [];
         this.properties = new PropertyDictionary();
         this.blobs = {};
+        this.auramanager = new AuraManager(this);
     }
 
     addPeer(peer){
@@ -687,11 +688,16 @@ class Room{
     }
 
     processMessage(source, message){
-        this.peers.forEach(peer =>{
-            if(peer != source){
-                peer.send(message);
-            }
-        })
+        if (NetworkId.Compare(message.objectId, this.auramanager.objectId)){
+            // console.log("Room Pass Message to Aura");
+            this.auramanager.processMessage(source, message);
+        }else{
+            this.peers.forEach(peer =>{
+                if(peer != source){
+                    peer.send(message);
+                }
+            })
+        }
     }
 }
 

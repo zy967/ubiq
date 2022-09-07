@@ -58,7 +58,7 @@ class NetworkContext{
     }
 }
 
-// A NetworkScene object provides the interface between a connection and the networked 
+// A NetworkScene object provides the interface between a connection and the networked
 // objects in the application.
 
 class NetworkScene{
