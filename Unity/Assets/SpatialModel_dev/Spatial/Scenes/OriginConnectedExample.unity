@@ -1423,6 +1423,12 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1495115536439675901, guid: 4b10d43f4575f254398e692be6cd6f48,
+        type: 3}
+      propertyPath: BotPeer
+      value: 
+      objectReference: {fileID: 1555463310617627421, guid: 4a4b9a51e222a5949bfd4a5d549b3d8d,
+        type: 3}
     - target: {fileID: 1495115537264162022, guid: 4b10d43f4575f254398e692be6cd6f48,
         type: 3}
       propertyPath: m_RootOrder
