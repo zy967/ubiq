@@ -42,7 +42,7 @@ class AuraCell{
     }
 
     addClient(medium, clientId){
-        if (! this.mediums.has(medium)){
+        if (this.mediums.has(medium)){
             this.mediums.get(medium).add(clientId);
         }else{
             this.mediums.set(medium, new Set([clientId]));
@@ -66,11 +66,11 @@ class ClientFocus{
         this.clientId = clientId;
     }
 
-    addAuraCell(medium, cellId){
-        if (! this.mediums.has(medium)){
-            this.mediums.get(medium).add(cellId);
+    addAuraCell(medium, cell){
+        if (this.mediums.has(medium)){
+            this.mediums.get(medium).add(cell);
         }else{
-            this.mediums.set(medium, new Set([cellId]));
+            this.mediums.set(medium, new Set([cell]));
         }
     }
 
@@ -100,7 +100,7 @@ class AuraCellDatabase{
         if (! this.focusingClients.has(clientId)){
             this.focusingClients.set(clientId, new ClientFocus(clientId));
         }
-        this.focusingClients.get(clientId).addAuraCell(medium, auraCellId);
+        this.focusingClients.get(clientId).addAuraCell(medium, this.auraCells.get(auraCellId));
     }
 
     getClients(auraCellId, medium){
@@ -110,15 +110,15 @@ class AuraCellDatabase{
         return undefined;
     }
 
-    clearClientFocus(medium, clientId){
-        if (this.focusingClients.has(clientId)){
-            let focusedCells = this.focusingClients.get(clientId).getAuraCells(medium);
+    clearClientFocus(medium, client){
+        if (this.focusingClients.has(client)){
+            let focusedCells = this.focusingClients.get(client).getAuraCells(medium);
             focusedCells.forEach(cell => {
-                if (! this.auraCells.has(cell.cellId)){
-                    this.auraCells.get(cell.cellId).removeSingleClient(medium, clientId);
+                if (this.auraCells.has(cell.cellId)){
+                    this.auraCells.get(cell.cellId).removeSingleClient(medium, client);
                 }
             });
-            this.focusingClients.get(clientId).clear();
+            this.focusingClients.get(client).clearFocus(medium);
         }
     }
 }
@@ -165,33 +165,38 @@ class AuraManager{
                     for (let i = origin.x - radius; i <= origin.x + radius; i++){
                         for (let j = origin.z - radius; j <= origin.z + radius; j ++){
                             let cellId = this.coordToAuraCellId(i, 0, j); // Assumed using Hex Cell here
-                            receiverClients.add(this.auracellDatabase.getClients(cellId, message.args.medium));
+                            let clients = this.auracellDatabase.getClients(cellId, message.args.medium)
+                                if (clients !== undefined){
+                                    clients.forEach(client =>{
+                                        receiverClients.add(client);
+                                    });
+                                }
                         }
                     }
 
                     this.room.peers.forEach(peer =>{
                         if (peer !== source){
-                            if(receiverClients.has(peer.objectId)){
+                            if(receiverClients.has(peer)){
                                 peer.send(Message.Create(message.args.senderId, message.args.message));
-                                console.log(message.args.message);
+                                // console.log(message.args.message);
                             }
-                            peer.send(Message.Create(message.args.senderId, message.args.message));
+                            // peer.send(Message.Create(message.args.senderId, message.args.message));
                         }
                     })
                 }
                 break;
 
-            case "SphereFocus":
+            case "AddSphereFocus":
                 let origin = message.args.origin;
                 let radius = message.args.radius;
                 let medium = message.args.medium;
-                let clientId = source.objectId;
+                let client = source;
 
-                this.auracellDatabase.clearClientFocus(medium, clientId);
+                this.auracellDatabase.clearClientFocus(medium, client);
                 for (let i = origin.x - radius; i <= origin.x + radius; i++){
                     for (let j = origin.z - radius; j <= origin.z + radius; j ++){
                         let cellId = this.coordToAuraCellId(i, 0, j); // Assumed using Hex Cell here
-                            this.auracellDatabase.addClient(cellId, medium, clientId);
+                            this.auracellDatabase.addClient(cellId, medium, client);
                     }
                 }
                 break;

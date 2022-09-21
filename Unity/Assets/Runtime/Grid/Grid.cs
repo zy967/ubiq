@@ -90,5 +90,10 @@ namespace Ubiq.Grid
 		{
 			OnLeftCellBorder.Invoke(info);
 		}
+
+		public ICell GetCell(string cellUuid)
+		{
+			return CellDictionary[cellUuid];
+		}
 	}
 }

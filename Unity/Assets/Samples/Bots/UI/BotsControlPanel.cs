@@ -1,117 +1,111 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using Ubiq.Messaging;
-using Ubiq.Samples.Bots;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Ubiq.Samples.Bots.UI
 {
-    public class BotsControlPanel : MonoBehaviour
-    {
-        public BotsController Controller;
-        public Text CommandRoomJoinCodeLabel;
-        public Text NumberOfPeersLabel;
-        public Button CreateRoomButton;
-        public Button JoinRoomButton;
-        public Button ToggleCameraButton;
-        public InputField JoinCodeInputField;
-        public Toggle EnableAudioToggle;
-        public Camera Camera;
-        public LayoutGroup BotManagerControlList;
-        public Button ClearButton;
-        public Button QuitBotProcessesButton;
+	public class BotsControlPanel : MonoBehaviour
+	{
+		public BotsController Controller;
+		public Text CommandRoomJoinCodeLabel;
+		public Text NumberOfPeersLabel;
+		public Button CreateRoomButton;
+		public Button JoinRoomButton;
+		public Button ToggleCameraButton;
+		public InputField JoinCodeInputField;
+		public Toggle EnableAudioToggle;
+		public Camera Camera;
+		public LayoutGroup BotManagerControlList;
+		public Button ClearButton;
+		public Button QuitBotProcessesButton;
 
-        public InputField UpdateRateField;
-        public InputField PaddingField;
+		public InputField UpdateRateField;
+		public InputField PaddingField;
 
-        private GameObject BotManagerControlPrototype;
-        private List<BotsManagerControl> BotManagerControls;
+		private GameObject BotManagerControlPrototype;
+		private List<BotsManagerControl> BotManagerControls;
 
-        private void Awake()
-        {
-            CreateRoomButton.onClick.AddListener(Controller.CreateBotsRoom);
+		private void Awake()
+		{
+			CreateRoomButton.onClick.AddListener(Controller.CreateBotsRoom);
 
-            JoinRoomButton.onClick.AddListener(() =>
-            {
-                Controller.AddBotsToRoom(JoinCodeInputField.text);
-            });
+			JoinRoomButton.onClick.AddListener(() => { Controller.AddBotsToRoom(JoinCodeInputField.text); });
 
-            ClearButton.onClick.AddListener(Controller.ClearBots);
-            QuitBotProcessesButton.onClick.AddListener(Controller.TerminateProcesses);
+			ClearButton.onClick.AddListener(Controller.ClearBots);
+			QuitBotProcessesButton.onClick.AddListener(Controller.TerminateProcesses);
 
-            ToggleCameraButton.onClick.AddListener(ToggleCamera);
-            
-            EnableAudioToggle.onValueChanged.AddListener(Controller.ToggleAudio);
+			ToggleCameraButton.onClick.AddListener(ToggleCamera);
 
-            BotManagerControls = new List<BotsManagerControl>();
-            BotManagerControlPrototype = BotManagerControlList.transform.GetChild(0).gameObject;
-            BotManagerControlPrototype.SetActive(false);
-        }
+			EnableAudioToggle.onValueChanged.AddListener(Controller.ToggleAudio);
 
-        // Update is called once per frame
-        void Update()
-        {
-            if(!Controller)
-            {
-                return;
-            }
+			BotManagerControls = new List<BotsManagerControl>();
+			BotManagerControlPrototype = BotManagerControlList.transform.GetChild(0).gameObject;
+			BotManagerControlPrototype.SetActive(false);
+		}
 
-            NumberOfPeersLabel.text = Controller.NumBotsRoomPeers.ToString();
+		// Update is called once per frame
+		void Update()
+		{
+			if (!Controller)
+			{
+				return;
+			}
 
-            if (!JoinCodeInputField.isFocused)
-            {
-                JoinCodeInputField.text = Controller.BotsJoinCode;
-            }
-            CommandRoomJoinCodeLabel.text = Controller.CommandJoinCode;
+			NumberOfPeersLabel.text = Controller.NumBotsRoomPeers.ToString();
 
-            while (BotManagerControls.Count < Controller.BotManagers.Count)
-            {
-                BotManagerControls.Add(
-                    GameObject.Instantiate(BotManagerControlPrototype, BotManagerControlList.transform)
-                    .GetComponent<BotsManagerControl>()
-                );
-            }
+			if (!JoinCodeInputField.isFocused)
+			{
+				JoinCodeInputField.text = Controller.BotsJoinCode;
+			}
 
-            int i = 0;
-            foreach (var item in Controller.BotManagers)
-            {
-                BotManagerControls[i].SetProxy(item);
-                BotManagerControls[i].gameObject.SetActive(true);
-                i++;
-            }
+			CommandRoomJoinCodeLabel.text = Controller.CommandJoinCode;
 
-            for(;i < BotManagerControls.Count; i++)
-            {
-                BotManagerControls[i].gameObject.SetActive(false);
-            }
+			while (BotManagerControls.Count < Controller.BotManagers.Count)
+			{
+				BotManagerControls.Add(
+					GameObject.Instantiate(BotManagerControlPrototype, BotManagerControlList.transform)
+						.GetComponent<BotsManagerControl>()
+				);
+			}
 
-            try
-            {
-                Controller.UpdateRate = int.Parse(UpdateRateField.text);
-            }
-            catch
-            {
-            }
+			int i = 0;
+			foreach (var item in Controller.BotManagers)
+			{
+				BotManagerControls[i].SetProxy(item);
+				BotManagerControls[i].gameObject.SetActive(true);
+				i++;
+			}
 
-            try
-            {
-                Controller.Padding = int.Parse(PaddingField.text);
-            }
-            catch
-            {
-            }
+			for (; i < BotManagerControls.Count; i++)
+			{
+				BotManagerControls[i].gameObject.SetActive(false);
+			}
 
-            UpdateRateField.text = Controller.UpdateRate.ToString();
-            PaddingField.text = Controller.Padding.ToString();
-            EnableAudioToggle.isOn = Controller.EnableAudio;
-        }
+			try
+			{
+				Controller.UpdateRate = int.Parse(UpdateRateField.text);
+			}
+			catch
+			{
+			}
 
-            public void ToggleCamera()
-        {
-            Camera.cullingMask ^= 1 << LayerMask.NameToLayer("Default");
-        }
-    }
+			try
+			{
+				Controller.Padding = int.Parse(PaddingField.text);
+			}
+			catch
+			{
+			}
+
+			UpdateRateField.text = Controller.UpdateRate.ToString();
+			PaddingField.text = Controller.Padding.ToString();
+			EnableAudioToggle.isOn = Controller.EnableAudio;
+		}
+
+		public void ToggleCamera()
+		{
+			Camera.cullingMask =
+				Camera.cullingMask == 0 ? LayerMask.GetMask("Aura", "Indicator", "Default", "Player") : 0;
+		}
+	}
 }

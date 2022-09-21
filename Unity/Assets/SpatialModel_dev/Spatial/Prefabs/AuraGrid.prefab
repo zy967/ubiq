@@ -44,10 +44,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   activeCells: []
-  outerRadius: 0.5
-  width: 100
-  height: 100
-  showCells: 0
+  outerRadius: 1
+  width: 10
+  height: 10
+  showTexture: 1
+  showLabel: 0
   expanding: 1
   cellPrefab: {fileID: 872766670886267247, guid: 7642dccfd8b1e7741af4cb3bce63ac80,
     type: 3}

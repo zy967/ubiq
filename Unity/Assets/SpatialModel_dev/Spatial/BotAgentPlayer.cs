@@ -1,3 +1,6 @@
+using Ubiq.Grid;
+using Ubiq.Messaging;
+using Ubiq.SpatialModel;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -14,8 +17,9 @@ namespace SpatialModel_dev.Spatial
 		public float Radius = 10f;
 		private Vector3 destination;
 
-		private bool isWandering = true;
+		public bool isWandering = true;
 
+		private AuraManagerClient auraManagerClient;
 		private NavMeshAgent navMeshAgent;
 		private float wanderingTime;
 
@@ -27,6 +31,7 @@ namespace SpatialModel_dev.Spatial
 		// Start is called before the first frame update
 		private void Start()
 		{
+			auraManagerClient = NetworkScene.FindNetworkScene(this).GetComponentInChildren<AuraManagerClient>();
 			Wander();
 		}
 
@@ -37,10 +42,15 @@ namespace SpatialModel_dev.Spatial
 
 			if (isWandering)
 			{
+				navMeshAgent.enabled = true;
 				// Have the agent wander around the scene
 				if (Vector3.Distance(destination, transform.position) < 1f || wanderingTime > 5f) Wander();
 
 				wanderingTime += Time.deltaTime;
+			}
+			else
+			{
+				navMeshAgent.enabled = false;
 			}
 		}
 
@@ -64,6 +74,18 @@ namespace SpatialModel_dev.Spatial
 			destination = hit.position;
 			navMeshAgent.destination = destination;
 			wanderingTime = 0;
+		}
+
+		public void OnTriggerEnter(Collider other)
+		{
+			if (auraManagerClient != null)
+			{
+				if (other.gameObject.layer == LayerMask.NameToLayer("Aura"))
+				{
+					auraManagerClient.AddSphereFocus("transform",
+						other.GetComponentInParent<HexCell>().Coordinates.AsVector3(), 2);
+				}
+			}
 		}
 	}
 }

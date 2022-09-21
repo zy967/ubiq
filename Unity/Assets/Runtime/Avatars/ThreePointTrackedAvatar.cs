@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 using Ubiq.Messaging;
 using Ubiq.SpatialModel;
 using UnityEngine;
@@ -101,37 +102,37 @@ namespace Ubiq.Avatars
 		{
 			// Co-ords from hints are already in local to our network scene
 			// so we can send them without any changes
-			// var transformBytes = MemoryMarshal.AsBytes(new ReadOnlySpan<State>(state));
-			//
-			// var message = ReferenceCountedSceneGraphMessage.Rent(transformBytes.Length);
-			// transformBytes.CopyTo(new Span<byte>(message.bytes, message.start, message.length));
-			//
-			// var a = message.ToString();
-			// var aa = transformBytes.ToString();
-			// var aaa = JsonUtility.ToJson(message);
-			//
-			// Debug.Log(a);
-			// Debug.Log(aa);
-			// Debug.Log(aaa);
+			var transformBytes = MemoryMarshal.AsBytes(new ReadOnlySpan<State>(state));
 
-			Vector3 currentCell =
-				auraManagerClient.GetCellsBySphere(state[0].head.position, 2.0f)?[0].Coordinates.AsVector3() ??
-				Vector3.one;
-			// auraManagerClient.Send(networkId, "transform",
-			// 	auraManagerClient.TryGetCellsBySphere(state[0].head.position, 3.0f), message.ToString());
-			auraManagerClient.SendBySphere(networkId,
-				"transform",
-				currentCell,
-				2,
-				JsonUtility.ToJson(state[0]));
+			var bytesLen = transformBytes.Length;
+			var message = ReferenceCountedSceneGraphMessage.Rent(bytesLen);
+			transformBytes.CopyTo(new Span<byte>(message.bytes, message.start, message.length));
+			string wrappedMessage = Convert.ToBase64String(message.bytes);
+
+
+			if (auraManagerClient != null)
+			{
+				var cell = auraManagerClient.GetCellOfThePosition(state[0].head.position) ??
+				           auraManagerClient.GetCellsBySphere(state[0].head.position, 1.0f)?[0];
+
+				Vector3 currentCell = cell != null ? cell.Coordinates.AsVector3() : Vector3.zero;
+				auraManagerClient.SendBySphere(networkId,
+					"transform",
+					currentCell,
+					0,
+					wrappedMessage);
+			}
+			else
+			{
+				networkScene.Send(networkId, wrappedMessage);
+			}
 		}
 
 		protected override void ProcessMessage(ReferenceCountedSceneGraphMessage message)
 		{
-			// MemoryMarshal.Cast<byte, State>(new ReadOnlySpan<byte>(message.bytes, message.start, message.length))
-			// 	.CopyTo(new Span<State>(state));
-			state[0] = JsonUtility.FromJson<State>(message.ToString());
-			// state[0] = message.FromJson<State>();
+			var bytes = Convert.FromBase64String(message.ToString());
+			MemoryMarshal.Cast<byte, State>(new ReadOnlySpan<byte>(bytes, 8, 84))
+				.CopyTo(new Span<State>(state));
 			OnRecv();
 		}
 

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace Ubiq.SpatialModel
 {
 	[Serializable]
-	internal class SpreadMessageBySphereArgs
+	internal struct SpreadMessageBySphereArgs
 	{
 		public NetworkId senderId;
 		public Vector3 origin;

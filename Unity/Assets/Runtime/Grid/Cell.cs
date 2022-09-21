@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Ubiq.Grid
@@ -124,20 +122,21 @@ namespace Ubiq.Grid
 
 		public static string GetCellUuid(string cellName, ICellCoordinates coords)
 		{
-			return new Guid(Animator.StringToHash(cellName),
-				(short) Animator.StringToHash(coords.ToString()),
-				(short) Animator.StringToHash(SceneManager.GetActiveScene().name),
-				new[]
-				{
-					(byte) coords.X,
-					(byte) coords.Y,
-					(byte) coords.Z,
-					(byte) (coords.X + coords.Y),
-					(byte) (coords.X + coords.Z),
-					(byte) (coords.Y + coords.Z),
-					(byte) (coords.X + coords.X),
-					(byte) (coords.Z + coords.Z)
-				}).ToString("N");
+			// return new Guid(Animator.StringToHash(cellName),
+			// 	(short) Animator.StringToHash(coords.ToString()),
+			// 	(short) Animator.StringToHash(SceneManager.GetActiveScene().name),
+			// 	new[]
+			// 	{
+			// 		(byte) coords.X,
+			// 		(byte) coords.Y,
+			// 		(byte) coords.Z,
+			// 		(byte) (coords.X + coords.Y),
+			// 		(byte) (coords.X + coords.Z),
+			// 		(byte) (coords.Y + coords.Z),
+			// 		(byte) (coords.X + coords.X),
+			// 		(byte) (coords.Z + coords.Z)
+			// 	}).ToString("N");
+			return coords.ToString();
 		}
 
 		public class CellEvent : UnityEvent<CellEventInfo>

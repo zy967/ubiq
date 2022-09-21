@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace SpatialModel_dev.Spatial
+namespace Ubiq.SpatialModel
 {
-	public class PlayerArranger : MonoBehaviour
+	public class AreaIndicator : MonoBehaviour
 	{
-		private Color areaColor;
+		private Color playerLinkColor;
 		private List<GameObject> players;
 
 		private void Awake()
 		{
 			players = new List<GameObject>();
-			areaColor = Random.ColorHSV(0, 1, 1, 1, 1, 1, 0.7f, 0.7f);
+			playerLinkColor = Random.ColorHSV(0, 1, 1, 1, 1, 1, 0.7f, 0.7f);
 		}
 
 		private void Update()
@@ -21,7 +21,7 @@ namespace SpatialModel_dev.Spatial
 			for (var i = 0; i < players.Count - 1; i++)
 			for (var j = i + 1; j < players.Count; j++)
 				Debug.DrawLine(players[i].transform.position, players[j].transform.position,
-					areaColor);
+					playerLinkColor);
 		}
 
 		private void OnTriggerEnter(Collider other)

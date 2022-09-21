@@ -36,7 +36,7 @@ namespace Ubiq.Grid
 
 		public override string ToString()
 		{
-			return $"({X.ToString()}, {Z.ToString()})";
+			return $"{X.ToString()},{Y.ToString()},{Z.ToString()}";
 		}
 
 		public string ToStringOnSeparateLines()

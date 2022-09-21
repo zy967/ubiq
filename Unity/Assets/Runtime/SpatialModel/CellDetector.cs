@@ -53,6 +53,17 @@ namespace Ubiq.SpatialModel
 			}
 		}
 
+		public Cell TryGetSingleCell(Vector3 origin)
+		{
+			RaycastHit hit = new RaycastHit();
+			if (Physics.SphereCast(origin, 0.5f, Vector3.down, out hit, 2, layerMask))
+			{
+				return hit.collider.GetComponentInParent<Cell>();
+			}
+
+			return null;
+		}
+
 		public List<string> GetCellsCoordBySphere(Vector3 origin, float radius)
 		{
 			TryGetCellsBySphere(origin, radius);
