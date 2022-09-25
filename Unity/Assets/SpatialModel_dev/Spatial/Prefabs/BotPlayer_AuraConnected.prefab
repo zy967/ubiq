@@ -369,7 +369,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db00a3fa0814c584fa4d86e94622691a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Radius: 30
+  Radius: 100
   isWandering: 1
 --- !u!54 &1576471018
 Rigidbody:
@@ -624,8 +624,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   networkId:
-    a: 1797389850
-    b: 912192997
+    a: 3427539027
+    b: 1112069463
   __serializedGoid: GlobalObjectId_V1-0-00000000000000000000000000000000-0-0
 --- !u!114 &1602017977552990765
 MonoBehaviour:

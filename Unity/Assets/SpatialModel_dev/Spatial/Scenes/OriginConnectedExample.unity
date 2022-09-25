@@ -122,7 +122,7 @@ NavMeshSettings:
     preserveTilesOutsideBounds: 0
     debug:
       m_Flags: 0
-  m_NavMeshData: {fileID: 23800000, guid: 1fb0e0e0cd898a949aaa63c0d69cd78e, type: 2}
+  m_NavMeshData: {fileID: 23800000, guid: dc8936fdb0d473e4ba024a49564b43b6, type: 2}
 --- !u!1 &150684206
 GameObject:
   m_ObjectHideFlags: 0
@@ -760,6 +760,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6071060860444024842, guid: 1508f40d35f3e2a4f82a68e09a586aa9,
+        type: 3}
+      propertyPath: outerRadius
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 6071060860444024843, guid: 1508f40d35f3e2a4f82a68e09a586aa9,
         type: 3}
       propertyPath: m_Name
@@ -1116,7 +1121,7 @@ PrefabInstance:
     - target: {fileID: 2963948517146543040, guid: b06674878cab4334eaf418e409d4ac55,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2963948517146543040, guid: b06674878cab4334eaf418e409d4ac55,
         type: 3}
@@ -1126,7 +1131,7 @@ PrefabInstance:
     - target: {fileID: 2963948517146543040, guid: b06674878cab4334eaf418e409d4ac55,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 5
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 2963948517146543040, guid: b06674878cab4334eaf418e409d4ac55,
         type: 3}
@@ -1846,6 +1851,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 558293536930308782, guid: 4a4b9a51e222a5949bfd4a5d549b3d8d,
+        type: 3}
+      propertyPath: Radius
+      value: 100
+      objectReference: {fileID: 0}
     - target: {fileID: 1555463310617627420, guid: 4a4b9a51e222a5949bfd4a5d549b3d8d,
         type: 3}
       propertyPath: m_RootOrder

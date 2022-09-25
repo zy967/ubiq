@@ -46,7 +46,7 @@ MonoBehaviour:
   DefaultCommandServer:
     listen_on_ip: 
     listen_on_port: 
-    send_to_ip: 18.133.119.167
+    send_to_ip: 192.168.50.129
     send_to_port: 8007
     type: 0
   DefaultBotServer:

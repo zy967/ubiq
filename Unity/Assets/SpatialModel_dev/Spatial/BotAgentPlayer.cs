@@ -83,7 +83,7 @@ namespace SpatialModel_dev.Spatial
 				if (other.gameObject.layer == LayerMask.NameToLayer("Aura"))
 				{
 					auraManagerClient.AddSphereFocus("transform",
-						other.GetComponentInParent<HexCell>().Coordinates.AsVector3(), 2);
+						other.GetComponentInParent<HexCell>().Coordinates.AsVector3(), 1);
 				}
 			}
 		}
